@@ -9,6 +9,10 @@ import java.util.Random;
 
 public class MMASProgram {
 
+    private static vertex initial_coordinates[];
+
+    private static vertex coordinates[];
+
     private static double distance[][];
 
     private static int n;
@@ -63,40 +67,77 @@ public class MMASProgram {
 
         String path = "/home/joao/projects/master-degree/aco-tsp-algorithm/tsp/";
         String file = "lin318.tsp";
-        distance = TspReader.getDistances(path, file);
-        n = distance.length;
-        System.out.print("TSP Loaded");
+        double[][] coord = TspReader.getCoordinates(path, file);
+        initial_coordinates = new vertex[coord.length];
+        coordinates = new vertex[coord.length];
+        for(int i = 0; i < coord.length; i++) {
+            initial_coordinates[i] = new vertex();
+            initial_coordinates[i].id = i;
+            initial_coordinates[i].x = coord[i][0];
+            initial_coordinates[i].y = coord[i][1];
+            coordinates[i] = new vertex();
+            coordinates[i].id = i;
+            coordinates[i].x = coord[i][0];
+            coordinates[i].y = coord[i][1];
+        }
+        n = coordinates.length;
+        distance = new double[n][n];
+        computeDistances();
+        System.out.println("TSP Loaded");
 
         allocateAnts();
         computeNNList();
         pheromone = new double[n][n];
         total = new double[n][n];
         initTry();
-
+        initialize_environment();
         while (currentIteration < maxIterations) {
             construct_solutions();
             update_statistics();
             pheromone_trail_update();
             search_control_and_statistics();
+            if (currentIteration % change_speed == 0) {
+                System.out.println("Best at change " + bestSoFarAnt.tourLength + " iteration " + currentIteration + " cycle " + cyclic_base_count);
+                change_environment();
+                apply_to_algorithm();
+            }
             currentIteration++;
         }
 
         System.out.println("Finish " + bestSoFarAnt.tourLength);
     }
 
+    static double euclideanDistance(int i, int j) {
+        double xd = coordinates[i].x - coordinates[j].x;
+        double yd = coordinates[i].y - coordinates[j].y;
+        return (int) (Math.sqrt(xd * xd + yd * yd) + 0.5);
+    }
+
+    static void computeDistances() {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if(i == j) {
+                    distance[i][j] = 0;
+                } else {
+                    distance[i][j] = euclideanDistance(i, j);
+                }
+            }
+        }
+    }
+
     static void search_control_and_statistics() {
         if ((currentIteration % 100) == 0) {
             population_statistics();
             branchingFactor = node_branching(lambda);
-            System.out.println("best so far " + bestSoFarAnt.tourLength + ", iteration: " + currentIteration + ", b_fac " + branchingFactor);
+            //System.out.println("best so far " + bestSoFarAnt.tourLength + ", iteration: " + currentIteration + ", b_fac " + branchingFactor);
 
             if (branchingFactor < branch_fac && (currentIteration - restartFoundBest > 250)) {
-                System.out.println("INIT TRAILS!!!\n");
+                //System.out.println("INIT TRAILS!!!\n");
                 restartBestAnt.tourLength = Integer.MAX_VALUE;
                 initPheromoneTrails(trailMax);
                 compute_total_information();
             }
-            System.out.println("iteration " + currentIteration + ", b-fac " + branchingFactor);
+            //System.out.println("iteration " + currentIteration + ", b-fac " + branchingFactor);
         }
     }
 
@@ -120,7 +161,7 @@ public class MMASProgram {
 
         String msg = "(Iteration = " + currentIteration + " ) (Mean = " + pop_mean + ") (Sd = " + pop_stddev
                  + ") (Branch = " + branchingFactor + ") (Dist = " + avg_distance + ")";
-        System.out.println(msg);
+        //System.out.println(msg);
     }
 
     static int distance_between_ants(ant a1, ant a2) {
@@ -233,7 +274,7 @@ public class MMASProgram {
         if (ants[iteration_best_ant].tourLength < restartBestAnt.tourLength) {
             copy_from_to(ants[iteration_best_ant], restartBestAnt);
             restartFoundBest = currentIteration;
-            System.out.println("restart best: " + restartBestAnt.tourLength + " restart_found_best " + restartFoundBest);
+            //System.out.println("restart best: " + restartBestAnt.tourLength + " restart_found_best " + restartFoundBest);
         }
     }
 
@@ -538,4 +579,131 @@ public class MMASProgram {
         return tour_length;
     }
 
+
+    /**
+     *
+     * MIACO CODE
+     *
+     */
+
+    private static int cyclic_base_count;
+
+    private static int change_speed = 100;
+
+    private static double change_degree = 0.75;
+
+    private static int cyclic_states = 4;
+
+    private static int[][] cyclic_random_vector;
+
+    private static int[][] cyclic_re_random_vector;
+
+    private static int[] random_vector;
+
+    private static int[] re_random_vector;
+
+    private static Random randomEnv = new Random(2);
+
+    static void initialize_environment() {
+        for (int i = 0; i < n; i++) {
+            coordinates[i].id = initial_coordinates[i].id;
+            coordinates[i].x = initial_coordinates[i].x;
+            coordinates[i].y = initial_coordinates[i].y;
+        }
+        generate_cyclic_environment();
+        cyclic_base_count = 0;
+        add_cyclic_change(cyclic_base_count);
+        apply_to_algorithm();
+    }
+
+    static void generate_cyclic_environment() {
+        int changes = (int) Math.abs(change_degree * n);
+        cyclic_random_vector = new int[cyclic_states][changes];
+        cyclic_re_random_vector = new int[cyclic_states][changes];
+        for (int i = 0; i < cyclic_states; i++) {
+            random_vector = generate_random_vector(n);
+            re_random_vector = generate_reordered_random_vector();
+            for (int j = 0; j < changes; j++) {
+                cyclic_random_vector[i][j] = random_vector[j];
+                cyclic_re_random_vector[i][j] = re_random_vector[j];
+            }
+        }
+    }
+
+    static int[] generate_random_vector(int size) {
+        int tot_assigned = 0;
+        int r[] = new int[size];
+        for (int i = 0; i < size; i++) {
+            r[i] = i;
+        }
+        for (int i = 0; i < size; i++) {
+            double rnd = randomEnv.nextDouble();
+            int node = (int) (rnd * (size - tot_assigned));
+            int help = r[i];
+            r[i] = r[i + node];
+            r[i + node] = help;
+            tot_assigned++;
+        }
+        return r;
+    }
+
+    static int[] generate_reordered_random_vector() {
+        int changes = (int) Math.abs(change_degree * n);
+        int[] r = new int[changes];
+        for (int i = 0; i < changes; i++) {
+            r[i] = random_vector[i];
+        }
+        for (int i = 0; i < changes; i++) {
+            int help = r[i];
+            int r_index = (int) (randomEnv.nextDouble() * (double) changes);
+            r[i] = r[r_index];
+            r[r_index] = help;
+        }
+        return r;
+    }
+
+    static void add_cyclic_change(int state) {
+        int changes = (int) Math.abs(change_degree * n);
+        for (int i = 0; i < changes; i++) {
+            int obj1 = coordinates[cyclic_random_vector[state][i]].id;
+            int obj2 = coordinates[cyclic_re_random_vector[state][i]].id;
+            random_vector[i] = cyclic_random_vector[state][i];
+            re_random_vector[i] = cyclic_re_random_vector[state][i];
+            swap_masked_objects(obj1, obj2);
+        }
+    }
+
+    static void swap_masked_objects(int obj1, int obj2) {
+        double help1 = coordinates[obj1].x;
+        double help2 = coordinates[obj1].y;
+        coordinates[obj1].x = coordinates[obj2].x;
+        coordinates[obj1].y = coordinates[obj2].y;
+        coordinates[obj2].x = help1;
+        coordinates[obj2].y = help2;
+    }
+
+    static void change_environment() {
+        if (cyclic_base_count == cyclic_states - 1)
+            cyclic_base_count = 0;
+        else
+            cyclic_base_count++;
+        reverse_changes();
+        add_cyclic_change(cyclic_base_count);
+        computeDistances();
+    }
+
+    static void reverse_changes() {
+        int changes = (int) Math.abs(change_degree * n);
+        for (int i = changes - 1; i >= 0; i--) {
+            int obj1 = coordinates[re_random_vector[i]].id;
+            int obj2 = coordinates[random_vector[i]].id;
+            swap_masked_objects(obj1, obj2);
+        }
+    }
+
+    static void apply_to_algorithm() {
+        computeNNList();
+        compute_total_information();
+        bestSoFarAnt.tourLength = Integer.MAX_VALUE;
+    }
 }
