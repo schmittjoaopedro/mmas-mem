@@ -58,6 +58,10 @@ public class Edge {
         this.originalSpeed = speed;
     }
 
+    public Double getOriginalSpeed() {
+        return originalSpeed;
+    }
+
     public void setSpeed(double speed) {
         this.speed = speed;
         timeSeconds = (distance / speed) * 1000;

@@ -6,8 +6,6 @@ import simulator.graph.Node;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -25,7 +23,8 @@ public class Visualizer extends JFrame {
 
     private ArrayList<ViewNode> nodes;
     private ArrayList<ViewEdge> edges;
-    private ArrayList<ViewEdge> route;
+    private ArrayList<ViewEdge> routeVisited;
+    private ArrayList<ViewEdge> routeNotVisited;
 
     private Graph graph;
 
@@ -56,22 +55,8 @@ public class Visualizer extends JFrame {
         }
         nodes = new ArrayList<ViewNode>();
         edges = new ArrayList<ViewEdge>();
-        route = new ArrayList<ViewEdge>();
-
-        this.addComponentListener(new ComponentAdapter() {
-            public void componentResized(ComponentEvent evt) {
-                Component c = (Component) evt.getSource();
-                viewWidth = c.getWidth();
-                viewHeight = c.getHeight();
-                width = 1;
-                height = 1;
-                scaleW = viewWidth / Math.abs(graph.getUpperX() - graph.getLowerX());
-                scaleH = viewHeight / Math.abs(graph.getUpperY() - graph.getLowerY());
-                scaleW *= .9;
-                scaleH *= .9;
-                draw(bestRoute);
-            }
-        });
+        routeVisited = new ArrayList<ViewEdge>();
+        routeNotVisited = new ArrayList<ViewEdge>();
 
         viewWidth = this.getWidth();
         viewHeight = this.getHeight();
@@ -83,10 +68,11 @@ public class Visualizer extends JFrame {
         scaleH *= .9;
     }
 
-    public void draw(Integer[] tour) {
+    public void draw(Integer[] tour, Set<Integer> visited) {
         this.nodes.clear();
         this.edges.clear();
-        this.route.clear();
+        this.routeVisited.clear();
+        this.routeNotVisited.clear();
         for (Node node : graph.getNodes()) {
             int x = (int) (scaleW * (node.getX() - graph.getLowerX()));
             int y = (int) (scaleH * (graph.getUpperY() - node.getY()));
@@ -98,7 +84,7 @@ public class Visualizer extends JFrame {
         if(tour != null) {
             bestRoute = tour;
             for (int i = 0; i < tour.length - 1; i++) {
-                this.addRoute(tour[i], tour[i + 1]);
+                this.addRoute(tour[i], tour[i + 1], (visited.contains(tour[i]) && visited.contains(tour[i + 1])));
             }
         }
         this.repaint();
@@ -139,8 +125,11 @@ public class Visualizer extends JFrame {
     }
 
     // Add an ViewEdge between nodes i and j
-    public void addRoute(int i, int j) {
-        route.add(new ViewEdge(i, j));
+    public void addRoute(int i, int j, boolean visited) {
+        if(visited)
+            routeVisited.add(new ViewEdge(i, j));
+        else
+            routeNotVisited.add(new ViewEdge(i, j));
     }
 
     // Clear and repaint the nodes and edges
@@ -149,7 +138,8 @@ public class Visualizer extends JFrame {
         Graphics2D g2 = (Graphics2D) g;
         if (edges != null) {
             ViewEdge edgesV[] = edges.toArray(new ViewEdge[] {});
-            ViewEdge routesV[] = route.toArray(new ViewEdge[] {});
+            ViewEdge routesVisitedV[] = routeVisited.toArray(new ViewEdge[] {});
+            ViewEdge routesNotVisitedV[] = routeNotVisited.toArray(new ViewEdge[] {});
             ViewNode nodeV[] = nodes.toArray(new ViewNode[] {});
             FontMetrics f = g.getFontMetrics();
             g.setColor(Color.black);
@@ -157,8 +147,13 @@ public class Visualizer extends JFrame {
                 g2.setStroke(new BasicStroke(1));
                 g.drawLine(nodeV[e.i].x, nodeV[e.i].y, nodeV[e.j].x, nodeV[e.j].y);
             }
-            g.setColor(Color.blue);
-            for (ViewEdge e : routesV) {
+            g.setColor(Color.green);
+            for (ViewEdge e : routesVisitedV) {
+                g2.setStroke(new BasicStroke(3));
+                g.drawLine(nodeV[e.i].x, nodeV[e.i].y, nodeV[e.j].x, nodeV[e.j].y);
+            }
+            g.setColor(Color.yellow);
+            for (ViewEdge e : routesNotVisitedV) {
                 g2.setStroke(new BasicStroke(3));
                 g.drawLine(nodeV[e.i].x, nodeV[e.i].y, nodeV[e.j].x, nodeV[e.j].y);
             }

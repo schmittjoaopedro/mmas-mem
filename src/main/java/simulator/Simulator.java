@@ -3,11 +3,13 @@ package simulator;
 import simulator.graph.Graph;
 import simulator.graph.Node;
 import simulator.mmas.RouteSolver;
+import simulator.visualizer.Visualizer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Simulator extends Thread {
 
@@ -15,13 +17,13 @@ public class Simulator extends Thread {
 
     private Node currentNode;
 
-    private Node nextNode;
+    private Node lastNode;
 
     private Set<Node> notVisitedPoints;
 
     private Set<Node> visitedPoints;
 
-    private Long endTime;
+    private Visualizer visualizer;
 
     private RouteSolver routeSolver;
 
@@ -33,31 +35,32 @@ public class Simulator extends Thread {
         currentNode = sourceNode;
         this.graph = graph;
         this.routeSolver = routeSolver;
+        Set<Integer> ids = targetNodes.stream().map(Node::getId).collect(Collectors.toSet());
+        this.visualizer = new Visualizer(graph, ids);
     }
 
     @Override
     public void run() {
         long timePass = System.currentTimeMillis() + 5000;
         visitedPoints.add(currentNode);
+        notVisitedPoints.remove(currentNode);
         while (!notVisitedPoints.isEmpty()) {
             if(System.currentTimeMillis() > timePass) {
-                if(nextNode != null) {
-                    routeSolver.addVisited(nextNode);
-                    currentNode = nextNode;
-                    visitedPoints.add(currentNode);
-                    nextNode = null;
-                }
-                if(nextNode == null) {
-                    for(Node node : routeSolver.getResultRoute()) {
-                        if(!visitedPoints.contains(node)) {
-                            nextNode = node;
-                            notVisitedPoints.remove(node);
-                            break;
-                        }
+                for(Node node : routeSolver.getResultRoute()) {
+                    if(!visitedPoints.contains(node)) {
+                        routeSolver.addVisited(node);
+                        notVisitedPoints.remove(node);
+                        visitedPoints.add(node);
+                        lastNode = currentNode;
+                        currentNode = node;
+                        break;
                     }
                 }
-                timePass = System.currentTimeMillis() + routeSolver.getRoute(currentNode, nextNode).getBestCost().longValue();
-                System.out.println("Going to: " + nextNode.getId());
+                timePass = System.currentTimeMillis() + routeSolver.getRoute(lastNode, currentNode).getBestCost().longValue();
+                System.out.println("Going to: " + currentNode.getId());
+                visualizer.draw(
+                        routeSolver.getResultRoute().stream().map(Node::getId).collect(Collectors.toList()).toArray(new Integer[] {}),
+                        visitedPoints.stream().map(Node::getId).collect(Collectors.toSet()));
             }
             try {
                 Thread.sleep(100);

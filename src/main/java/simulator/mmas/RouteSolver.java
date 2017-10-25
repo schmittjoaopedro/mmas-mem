@@ -2,13 +2,14 @@ package simulator.mmas;
 
 import simulator.graph.Graph;
 import simulator.graph.Node;
+import simulator.utils.DynamicListener;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-public class RouteSolver extends Thread {
+public class RouteSolver extends Thread implements DynamicListener {
 
     private Globals _globals;
 
@@ -21,7 +22,7 @@ public class RouteSolver extends Thread {
         _globals.graph = graph;
         _globals.sourceNode = sourceNode;
         _globals.targetNodes = targetNodes;
-        Ant.fixed.add(sourceNode);
+        Ant.getFixed(sourceNode, null);
         if(!targetNodes.contains(sourceNode)) {
             throw new RuntimeException("TargetNodes must contains SourceNode");
         }
@@ -47,6 +48,7 @@ public class RouteSolver extends Thread {
             updateStatistics();
             pheromoneTrailUpdate();
             searchControl();
+            statistics.calculateStatistics();
             _globals.iteration++;
         }
     }
@@ -108,9 +110,7 @@ public class RouteSolver extends Thread {
             _globals.restartFoundBestIteration = _globals.iteration;
             _globals.trailMax = 1.0 / (_globals.rho * _globals.bestSoFar.getCost());
             _globals.trailMin = _globals.trailMax / (2.0 * _globals.graph.getNodes().size());
-            String message = String.format("Best tour found %05d, at iteration %05d",
-                    (int) _globals.bestSoFar.getCost(),
-                    _globals.iteration);
+            String message = String.format("Best tour found %05d, at iteration %05d, diversity %.2f", (int) _globals.bestSoFar.getCost(), _globals.iteration, statistics.getDiversity());
             message += "\t\t[" + _globals.bestSoFar.getTour().get(0).getId();
             for(int i = 1; i < _globals.bestSoFar.getTour().size(); i++) {
                 message += "->" + _globals.bestSoFar.getTour().get(i).getId();
@@ -244,6 +244,18 @@ public class RouteSolver extends Thread {
     }
 
     public void addVisited(Node node) {
-        Ant.fixed.add(node);
+        Ant.getFixed(node, null);
+    }
+
+    @Override
+    public void updatedWeights() {
+        System.out.println("Dynamic environment change");
+        this._globals.routeManager.updateRoutes();
+        Ant ant = new Ant(_globals);
+        ant.nnTour();
+        _globals.bestSoFar = ant.clone();
+        _globals.restartBestAnt =  ant.clone();
+        _globals.foundBestIteration = _globals.iteration;
+        _globals.restartFoundBestIteration = _globals.iteration;
     }
 }

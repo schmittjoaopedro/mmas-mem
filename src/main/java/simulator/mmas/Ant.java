@@ -2,6 +2,7 @@ package simulator.mmas;
 
 import simulator.graph.Node;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
@@ -14,7 +15,7 @@ public class Ant {
 
     private Set<Node> visited;
 
-    public static Set<Node> fixed = new HashSet<>();
+    public static Stack<Node> fixed = new Stack<>();
 
     private double cost;
 
@@ -24,11 +25,21 @@ public class Ant {
         _globals = globals;
     }
 
+    public static synchronized Stack<Node> getFixed(Node node, Collection<Node> toCopy) {
+        if(node != null) {
+            Ant.fixed.add(node);
+        }
+        if(toCopy != null) {
+            toCopy.addAll(Ant.fixed);
+        }
+        return Ant.fixed;
+    }
+
     public void nnTour() {
         tour = new Stack<>();
         visited = new HashSet<>();
-        tour.addAll(fixed);
-        visited.addAll(fixed);
+        Ant.getFixed(null, tour);
+        Ant.getFixed(null, visited);
         Node currentNode = _globals.sourceNode;
         while(tour.size() != _globals.targetNodes.size()) {
             Node nextNode = selectNextNearNode(currentNode);
@@ -60,8 +71,8 @@ public class Ant {
     public void heuristicTour() {
         tour = new Stack<>();
         visited = new HashSet<>();
-        tour.addAll(fixed);
-        visited.addAll(fixed);
+        Ant.getFixed(null, tour);
+        Ant.getFixed(null, visited);
         Node currentNode = _globals.sourceNode;
         while(tour.size() != _globals.targetNodes.size()) {
             Node nextNode = selectNextHeuristicNode(currentNode);

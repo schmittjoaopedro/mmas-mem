@@ -25,7 +25,7 @@ public class Statistics {
     }
 
     public void calculateStatistics() {
-        if(_globals.iteration % 10 == 0 && _globals.bestSoFar != null) {
+        if(_globals.iteration % 100 == 0 && _globals.bestSoFar != null) {
             double[] costs = new double[_globals.numberAnts];
             for (int a = 0; a < _globals.numberAnts; a++) {
                 costs[a] = _globals.ants[a].getCost();
@@ -35,12 +35,21 @@ public class Statistics {
             iterationWorst.put(_globals.iteration, getWorst(costs));
             iterationBestSoFar.put(_globals.iteration, _globals.bestSoFar.getCost());
             //Iteration, Mean, Best, Worst, Best so Far
-            String message = String.format("%05d, %05d, %05d, %05d, %05d,",
+            /*String message = String.format("%05d, %05d, %05d, %05d, %05d,",
                     _globals.iteration,
                     (int) mean(costs),
                     (int) getBest(costs),
                     (int) getWorst(costs),
-                    (int) _globals.bestSoFar.getCost());
+                    (int) _globals.bestSoFar.getCost());*/
+            //System.out.println(message);
+            int iter = _globals.iteration;
+            int mean = (int) mean(costs);
+            int best = (int) getBest(costs);
+            int worst = (int) getWorst(costs);
+            int bsf = (int) _globals.bestSoFar.getCost();
+            double div = getDiversity();
+            String message = String.format("(Iter = %08d), (Mean = %08d), (Best = %08d), (Worst = %08d), (Bsf = %08d), (Div = %.2f)",
+                    iter, mean, best, worst, bsf, div);
             //System.out.println(message);
         }
     }
@@ -52,6 +61,36 @@ public class Statistics {
             sum += values[i];
         }
         return sum / values.length;
+    }
+
+    public double getDiversity() {
+        double div = 0.0;
+        for (int i = 0; i < _globals.numberAnts; i++) {
+            for (int j = 0; j < _globals.numberAnts; j++) {
+                if (i != j) {
+                    div += distanceBetweenAnts(_globals.ants[i], _globals.ants[j]);
+                }
+            }
+        }
+        return (1.0 / (_globals.numberAnts * (_globals.numberAnts - 1.0))) * div;
+    }
+
+    public double distanceBetweenAnts(Ant a1, Ant a2) {
+        int pos, n = _globals.targetNodes.size();
+        double distance = 0.0;
+        Map<Integer, Integer> edges = new HashMap<>();
+        for(int i = 0; i < a2.getTour().size() - 1; i++) {
+            edges.put(a2.getTour().get(i).getId(), a1.getTour().get(i + 1).getId());
+        }
+        for(int i = 0; i < a1.getTour().size() - 1; i++) {
+            int j = a1.getTour().get(i).getId();
+            int h = a1.getTour().get(i + 1).getId();
+            pos = edges.get(j);
+            if(h == pos) {
+                distance++;
+            }
+        }
+        return 1.0 - (distance / (double) n);
     }
 
     public double getBest(double[] values) {
