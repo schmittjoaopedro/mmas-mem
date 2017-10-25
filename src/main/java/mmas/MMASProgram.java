@@ -25,19 +25,19 @@ public class MMASProgram {
 
     private static double[][] total;
 
-    private static int maxIterations = 5000;
+    private static int maxIterations = 1000;
 
     private static int currentIteration;
 
     private static double lambda = 0.05;
 
-    private static int nAnts = 25;
+    private static int nAnts = 50;
 
     private static double alpha = 1.0;
 
     private static double beta = 2.0;
 
-    private static double rho = 0.5;
+    private static double rho = 0.02;
 
     private static double q_0 = 0.0;
 
@@ -63,6 +63,8 @@ public class MMASProgram {
 
     private static Random random = new Random(1);
 
+    private static boolean useMIACO = false;
+
     public static void main(String[] args) {
 
         String path = "/home/joao/projects/master-degree/aco-tsp-algorithm/tsp/";
@@ -86,6 +88,7 @@ public class MMASProgram {
         System.out.println("TSP Loaded");
 
         allocateAnts();
+        allocateStructures();
         computeNNList();
         pheromone = new double[n][n];
         total = new double[n][n];
@@ -97,7 +100,7 @@ public class MMASProgram {
             pheromone_trail_update();
             search_control_and_statistics();
             if (currentIteration % change_speed == 0) {
-                System.out.println("Best at change " + bestSoFarAnt.tourLength + " iteration " + currentIteration + " cycle " + cyclic_base_count);
+                System.out.println("Best at change " + bestSoFarAnt.tourLength + " iteration " + currentIteration + " cycle " + cyclic_base_count + " diversity " + calc_diversity());
                 change_environment();
                 apply_to_algorithm();
             }
@@ -123,6 +126,18 @@ public class MMASProgram {
                 }
             }
         }
+    }
+
+    static double calc_diversity() {
+        double div = 0.0;
+        for (int i = 0; i < nAnts; i++) {
+            for (int j = 0; j < nAnts; j++) {
+                if (i != j) {
+                    div += distance_between_ants(ants[i], ants[j]);
+                }
+            }
+        }
+        return (1.0 / (nAnts * (nAnts - 1.0))) * div;
     }
 
     static void search_control_and_statistics() {
@@ -164,15 +179,14 @@ public class MMASProgram {
         //System.out.println(msg);
     }
 
-    static int distance_between_ants(ant a1, ant a2) {
+    static double distance_between_ants(ant a1, ant a2) {
         int i, j, h, pos, pred;
-        int distance;
+        double distance = 0.0;
         int[] pos2;
         pos2 = new int[n];
         for (i = 0; i < n; i++) {
             pos2[a2.tour[i]] = i;
         }
-        distance = 0;
         for (i = 0; i < n; i++) {
             j = a1.tour[i];
             h = a1.tour[i + 1];
@@ -189,11 +203,15 @@ public class MMASProgram {
                 distance++;
             }
         }
-        return distance;
+        return 1.0 - (distance / (double) n);
     }
 
     static void pheromone_trail_update() {
-        evaporation();
+        if(useMIACO) {
+            initPheromoneTrails(trailMin);
+        } else {
+            evaporation();
+        }
         mmas_update();
         check_pheromone_trail_limits();
         compute_total_information();
@@ -215,10 +233,19 @@ public class MMASProgram {
     }
 
     static void mmas_update() {
-        int iteration_best_ant;
+        if(useMIACO) {
+            update_long_term_memory();
+            update_short_term_memory();
+        }
         if (currentIteration % u_gb == 0) {
-            iteration_best_ant = find_best();
-            global_update_pheromone(ants[iteration_best_ant]);
+            if(useMIACO) {
+                for (int i = 0; i < shortMemorySize; i++) {
+                    global_update_pheromone(shortMemory[i]);
+                }
+            } else {
+                int iteration_best_ant = find_best();
+                global_update_pheromone(ants[iteration_best_ant]);
+            }
         } else {
             if (u_gb == 1 && (currentIteration - restartFoundBest > 50))
                 global_update_pheromone(bestSoFarAnt);
@@ -269,12 +296,19 @@ public class MMASProgram {
             trailMin = 1. * (1. - p_x) / (p_x * (double) ((nnListSize + 1) / 2));
             trailMax = 1. / ((rho) * bestSoFarAnt.tourLength);
             trailMin = trailMax * trailMin;
-            System.out.println("best " + bestSoFarAnt.tourLength + ", iteration: " + currentIteration);
+            //System.out.println("best " + bestSoFarAnt.tourLength + ", iteration: " + currentIteration);
         }
         if (ants[iteration_best_ant].tourLength < restartBestAnt.tourLength) {
             copy_from_to(ants[iteration_best_ant], restartBestAnt);
             restartFoundBest = currentIteration;
             //System.out.println("restart best: " + restartBestAnt.tourLength + " restart_found_best " + restartFoundBest);
+        }
+        if (useMIACO) {
+            copy_from_to(bestSoFarAnt, previousBestSoFarAnt);
+            copy_from_to(previousBest[1], previousBest[0]);
+            copy_from_to(previousBestSoFarAnt, previousBest[1]);
+            copy_from_to(previousBest[0], previousBestSoFarAnt);
+            if (currentIteration == 1) copy_from_to(bestSoFarAnt, previousBestSoFarAnt);
         }
     }
 
@@ -454,6 +488,19 @@ public class MMASProgram {
         restartBestAnt.tour = new int[n + 1];
         restartBestAnt.visited = new boolean[n];
 
+        if(useMIACO) {
+            previousBest = new ant[2];
+            for (int i = 0; i < 2; i++) {
+                previousBest[i] = new ant();
+                previousBest[i].tour = new int[n + 1];
+                previousBest[i].visited = new boolean[n];
+            }
+
+            previousBestSoFarAnt = new ant();
+            previousBestSoFarAnt.tour = new int[n + 1];
+            previousBestSoFarAnt.visited = new boolean[n];
+        }
+
     }
 
     public static void computeNNList() {
@@ -486,7 +533,7 @@ public class MMASProgram {
         trailMin = trailMax / (2. * n);
         initPheromoneTrails(trailMax);
         compute_total_information();
-
+        if(useMIACO) initMemoryRandomly();
     }
 
     static double HEURISTIC(int m, int n) {
@@ -602,6 +649,27 @@ public class MMASProgram {
 
     private static int[] re_random_vector;
 
+    //Miaco
+    private static ant previousBestSoFarAnt;
+
+    private static ant[] previousBest;
+
+    private static ant[] shortMemory;
+
+    private static ant[] longMemory;
+
+    private static double immigrantRate = 0.4;
+
+    private static double pMi = 0.01;
+
+    private static int shortMemorySize = 6;
+
+    private static int longMemorySize = 4;
+
+    private static int tM;
+
+    private static boolean[] randomPoint;
+
     private static Random randomEnv = new Random(2);
 
     static void initialize_environment() {
@@ -705,5 +773,185 @@ public class MMASProgram {
         computeNNList();
         compute_total_information();
         bestSoFarAnt.tourLength = Integer.MAX_VALUE;
+    }
+
+    static void allocateStructures() {
+        shortMemory = new ant[shortMemorySize];
+        longMemory = new ant[longMemorySize];
+        randomPoint = new boolean[longMemorySize];
+    }
+
+    static void initMemoryRandomly() {
+        for (int i = 0; i < longMemorySize; i++) {
+            longMemory[i] = new ant();
+            longMemory[i].tour = generate_random_immigrant();
+            longMemory[i].tourLength = computeTourLength(longMemory[i].tour);
+            randomPoint[i] = true;
+        }
+        tM = 5 + ((int) (random.nextDouble() * 6.0));
+    }
+
+    static int[] generate_random_immigrant() {
+        int[] random_immigrant = new int[n + 1];
+        int tot_assigned = 0;
+        for (int i = 0; i < n; i++) {
+            random_immigrant[i] = i;
+        }
+        random_immigrant[n] = random_immigrant[0];
+        for (int i = 0; i < n; i++) {
+            int object = (int) (random.nextDouble() * (double) (n - tot_assigned));
+            int help = random_immigrant[i];
+            random_immigrant[i] = random_immigrant[i + object];
+            random_immigrant[i + object] = help;
+            tot_assigned++;
+        }
+        random_immigrant[n] = random_immigrant[0];
+        return random_immigrant;
+    }
+
+    static void update_long_term_memory() {
+        boolean flag = detect_change();
+        if (flag == true) {
+            update_memory_every_change();
+        }
+        if (currentIteration == tM && flag == false) {
+            update_memory_dynamically();
+            int rnd = 5 + ((int) (random.nextDouble() * 6.0));
+            tM = currentIteration + rnd;
+        }
+        if (currentIteration == tM && flag == true) {
+            int rnd = 5 + ((int) (random.nextDouble() * 6.0));
+            tM = currentIteration + rnd;
+        }
+    }
+
+    static void update_memory_dynamically() {
+        int index = -1;
+        for (int i = 0; i < longMemorySize; i++) {
+            if (randomPoint[i] == true) {
+                index = i;
+                randomPoint[i] = false;
+                break;
+            }
+        }
+        if (index != -1) {
+            copy_from_to(bestSoFarAnt, longMemory[index]);
+        } else {
+            int closest_ind = -1;
+            double closest = Integer.MAX_VALUE;
+            for (int i = 0; i < longMemorySize; i++) {
+                double d = distance_between_ants(bestSoFarAnt, longMemory[i]);
+                if (closest > d) {
+                    closest = d;
+                    closest_ind = i;
+                }
+            }
+            if (bestSoFarAnt.tourLength < longMemory[closest_ind].tourLength) {
+                copy_from_to(bestSoFarAnt, longMemory[closest_ind]);
+            }
+        }
+    }
+
+    static void update_memory_every_change() {
+        int index = -1;
+        for (int i = 0; i < longMemorySize; i++) {
+            if (randomPoint[i] == true) {
+                index = i;
+                randomPoint[i] = false;
+                break;
+            }
+        }
+        previousBestSoFarAnt.tourLength = computeTourLength(previousBestSoFarAnt.tour);
+        if (index != -1) {
+            copy_from_to(previousBestSoFarAnt, longMemory[index]);
+        } else {
+            double closest = Integer.MAX_VALUE;
+            int closest_ind = -1;
+            for (int i = 0; i < longMemorySize; i++) {
+                double d = distance_between_ants(previousBestSoFarAnt, longMemory[i]);
+                if (closest > d) {
+                    closest = d;
+                    closest_ind = i;
+                }
+            }
+            if (previousBestSoFarAnt.tourLength < longMemory[closest_ind].tourLength) {
+                copy_from_to(previousBestSoFarAnt, longMemory[closest_ind]);
+            }
+        }
+    }
+
+    static boolean detect_change() {
+        int i, total_before, total_after;
+        total_before = total_after = 0;
+        for (i = 0; i < longMemorySize; i++) {
+            total_before += longMemory[i].tourLength;
+        }
+        for (i = 0; i < longMemorySize; i++) {
+            longMemory[i].tourLength = computeTourLength(longMemory[i].tour);
+            total_after += longMemory[i].tourLength;
+        }
+        if (total_after == total_before)
+            return false;
+        else
+            return true;
+    }
+
+    static void update_short_term_memory() {
+        int im_size = (int) (shortMemorySize * immigrantRate);
+        Integer[] tours = new Integer[nAnts];
+        Integer[] id = new Integer[nAnts];
+        ant[] immigrants = new ant[im_size];
+        for (int i = 0; i < im_size; i++) {
+            immigrants[i] = new ant();
+            immigrants[i].tour = generate_memory_based_immigrant();
+            immigrants[i].tourLength = computeTourLength(immigrants[i].tour);
+        }
+        for (int i = 0; i < nAnts; i++) {
+            tours[i] = ants[i].tourLength;
+            id[i] = i;
+        }
+        Arrays.sort(id, new Comparator<Integer>() {
+            public int compare(final Integer o1, final Integer o2) {
+                return Double.compare(tours[o1], tours[o2]);
+            }
+        });
+        for (int i = 0; i < shortMemorySize; i++) {
+            shortMemory[i] = ants[id[i]];
+        }
+        for (int i = shortMemorySize - 1; i > shortMemorySize - im_size - 1; i--) {
+            copy_from_to(immigrants[shortMemorySize - 1 - i], shortMemory[i]);
+        }
+    }
+
+    static int[] generate_memory_based_immigrant() {
+        int[] memory_immigrant = new int[n + 1];
+        int mem_ind = find_memory_best();
+        for (int i = 0; i < n; i++) {
+            memory_immigrant[i] = longMemory[mem_ind].tour[i];
+        }
+        memory_immigrant[n] = memory_immigrant[0];
+        for (int i = 0; i < n; i++) {
+            if (random.nextDouble() <= pMi) {
+                int object = (int) (random.nextDouble() * (double) (n - 1));
+                int help = memory_immigrant[i];
+                memory_immigrant[i] = memory_immigrant[object];
+                memory_immigrant[object] = help;
+            }
+        }
+        memory_immigrant[n] = memory_immigrant[0];
+        return memory_immigrant;
+    }
+
+    static int find_memory_best() {
+        int k, k_min, min;
+        min = longMemory[0].tourLength;
+        k_min = 0;
+        for (k = 1; k < longMemorySize; k++) {
+            if (longMemory[k].tourLength < min) {
+                min = longMemory[k].tourLength;
+                k_min = k;
+            }
+        }
+        return k_min;
     }
 }
