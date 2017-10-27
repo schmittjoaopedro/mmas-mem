@@ -11,26 +11,36 @@ public class DynamicGenerator extends Thread {
 
     private long frequency;
 
+    private double upperBound;
+
+    private double lowerBound;
+
     private Graph graph;
 
-    private Random random = new Random(3);
+    private Random random = new Random();
 
     private DynamicListener dynamicListener;
 
-    public DynamicGenerator(Graph graph, double magnitude, long frequency) {
+    public DynamicGenerator(Graph graph, double magnitude, long frequency, double lowerBound, double upperBound) {
         this.graph = graph;
         this.magnitude = magnitude;
         this.frequency = frequency;
+        this.upperBound = upperBound;
+        this.lowerBound = lowerBound;
     }
 
     @Override
     public void run() {
-        long nextTime = System.currentTimeMillis() + frequency;
+        long nextTime = System.currentTimeMillis();
         while(true) {
             if(System.currentTimeMillis() > nextTime) {
                 for(Edge edge : graph.getEdges()) {
-                    double prop = (-1 + (2 * random.nextDouble())) * magnitude;
-                    edge.setSpeed(edge.getOriginalSpeed() + edge.getOriginalSpeed() * prop);
+                    if(random.nextDouble() < magnitude) {
+                        double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
+                        edge.setSpeed(prop);
+                    } else {
+                        edge.setSpeed(edge.getOriginalSpeed());
+                    }
                 }
                 nextTime = System.currentTimeMillis() + frequency;
                 if(this.getDynamicListener() != null) {

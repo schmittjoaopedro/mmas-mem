@@ -1,8 +1,11 @@
 package simulator.mmas;
 
 
+import simulator.graph.Node;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 public class Statistics {
 
@@ -16,12 +19,17 @@ public class Statistics {
 
     private Map<Integer, Double> iterationBestSoFar;
 
-    public Statistics(Globals globals) {
+    private RouteSolver routeSolver;
+
+    private static Map<String, Double> costMap = new HashMap<>();
+
+    public Statistics(Globals globals, RouteSolver routeSolver) {
         this._globals = globals;
         iterationMean = new HashMap<>();
         iterationBest = new HashMap<>();
         iterationWorst = new HashMap<>();
         iterationBestSoFar = new HashMap<>();
+        this.routeSolver = routeSolver;
     }
 
     public void calculateStatistics() {
@@ -47,11 +55,30 @@ public class Statistics {
             int best = (int) getBest(costs);
             int worst = (int) getWorst(costs);
             int bsf = (int) _globals.bestSoFar.getCost();
+            int adjBsf = (int) getCost();
             double div = getDiversity();
-            String message = String.format("(Iter = %08d), (Mean = %08d), (Best = %08d), (Worst = %08d), (Bsf = %08d), (Div = %.2f)",
-                    iter, mean, best, worst, bsf, div);
-            //System.out.println(message);
+            //String message = String.format(" -------> (Iter = %08d), (Mean = %08d), (Best = %08d), (Worst = %08d), (Bsf = %08d), (Div = %.2f)",
+            String message = String.format("%08d;%08d;%08d;%08d;%08d;%08d;%.2f",
+                    iter, mean, best, worst, bsf, adjBsf, div);
+            System.out.println(message);
         }
+    }
+
+    public double getCost() {
+        Stack<Node> tour = routeSolver.getResultTour();
+        Double cost = 0.0;
+        for(int i = 1; i < tour.size(); i++) {
+            if(Ant.fixed.contains(tour.get(i - 1)) && Ant.fixed.contains(tour.get(i))) {
+                String key = tour.get(i - 1).getId() + "->" + tour.get(i).getId();
+                if(!costMap.containsKey(key)) {
+                    costMap.put(key, routeSolver.getRoute(tour.get(i - 1), tour.get(i)).getBestCost());
+                }
+                cost += costMap.get(key);
+            } else {
+                cost += routeSolver.getRoute(tour.get(i - 1), tour.get(i)).getBestCost();
+            }
+        }
+        return cost;
     }
 
     public double mean(double[] values) {

@@ -2,10 +2,7 @@ package simulator.mmas;
 
 import simulator.graph.Node;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 public class Ant {
 
@@ -161,4 +158,10 @@ public class Ant {
         }
         return ant;
     }
+
+    @Override
+    public String toString() {
+        return "Cost = " + cost;
+    }
+
 }

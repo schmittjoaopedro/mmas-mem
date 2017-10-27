@@ -2,13 +2,11 @@ package simulator;
 
 import simulator.graph.Graph;
 import simulator.graph.Node;
+import simulator.mmas.Route;
 import simulator.mmas.RouteSolver;
 import simulator.visualizer.Visualizer;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Simulator extends Thread {
@@ -27,6 +25,8 @@ public class Simulator extends Thread {
 
     private RouteSolver routeSolver;
 
+    private Map<String, List<Node>> routesVisited;
+
     public Simulator(Graph graph, Node sourceNode, List<Node> targetNodes, RouteSolver routeSolver) {
         this.notVisitedPoints = new HashSet<>();
         this.notVisitedPoints.addAll(targetNodes);
@@ -37,16 +37,17 @@ public class Simulator extends Thread {
         this.routeSolver = routeSolver;
         Set<Integer> ids = targetNodes.stream().map(Node::getId).collect(Collectors.toSet());
         this.visualizer = new Visualizer(graph, ids);
+        this.routesVisited = new HashMap<>();
     }
 
     @Override
     public void run() {
-        long timePass = System.currentTimeMillis() + 5000;
+        long timePass = System.currentTimeMillis() + 10000;
         visitedPoints.add(currentNode);
         notVisitedPoints.remove(currentNode);
         while (!notVisitedPoints.isEmpty()) {
             if(System.currentTimeMillis() > timePass) {
-                for(Node node : routeSolver.getResultRoute()) {
+                for(Node node : routeSolver.getResultTour()) {
                     if(!visitedPoints.contains(node)) {
                         routeSolver.addVisited(node);
                         notVisitedPoints.remove(node);
@@ -57,10 +58,8 @@ public class Simulator extends Thread {
                     }
                 }
                 timePass = System.currentTimeMillis() + routeSolver.getRoute(lastNode, currentNode).getBestCost().longValue();
-                System.out.println("Going to: " + currentNode.getId());
-                visualizer.draw(
-                        routeSolver.getResultRoute().stream().map(Node::getId).collect(Collectors.toList()).toArray(new Integer[] {}),
-                        visitedPoints.stream().map(Node::getId).collect(Collectors.toSet()));
+                System.out.println(" ---> Going to: " + currentNode.getId());
+                drawFull();
             }
             try {
                 Thread.sleep(100);
@@ -69,6 +68,45 @@ public class Simulator extends Thread {
             }
         }
         routeSolver.finish();
+    }
+
+    private void drawSimple() {
+        visualizer.draw(
+            routeSolver.getResultTour().stream().map(Node::getId).collect(Collectors.toList()).toArray(new Integer[] {}),
+            visitedPoints.stream().map(Node::getId).collect(Collectors.toSet()), new HashSet<>());
+    }
+
+
+    private void drawFull() {
+        List<Integer> routeTour = new ArrayList<>();
+        Set<Integer> visited = new HashSet<>();
+        Stack<Node> tour = routeSolver.getResultTour();
+        Set<Integer> traversed = new HashSet<>();
+        for(int i = 1; i < tour.size(); i++) {
+            Route route = routeSolver.getRoute(tour.get(i - 1), tour.get(i));
+            if(visitedPoints.contains(tour.get(i)) && visitedPoints.contains(tour.get(i - 1))) {
+                String key = tour.get(i - 1).getId() + "->" + tour.get(i).getId();
+                if(routesVisited.containsKey(key)) {
+                    for (Node path : routesVisited.get(key)) {
+                        visited.add(path.getId());
+                        routeTour.add(path.getId());
+                        traversed.add(path.getId());
+                    }
+                } else {
+                    routesVisited.put(key, new ArrayList<>());
+                    for (Node path : route.getBestRoute()) {
+                        routeTour.add(path.getId());
+                        visited.add(path.getId());
+                        routesVisited.get(key).add(path);
+                    }
+                }
+            } else {
+                for (Node path : route.getBestRoute()) {
+                    routeTour.add(path.getId());
+                }
+            }
+        }
+        visualizer.draw(routeTour.toArray(new Integer[] {}), visited, traversed);
     }
 
 }

@@ -35,7 +35,7 @@ public class RouteSolver extends Thread implements DynamicListener {
             }
         }
         _globals.routeManager.updateRoutes();
-        statistics = new Statistics(_globals);
+        statistics = new Statistics(_globals, this);
     }
 
     @Override
@@ -49,6 +49,7 @@ public class RouteSolver extends Thread implements DynamicListener {
             pheromoneTrailUpdate();
             searchControl();
             statistics.calculateStatistics();
+            repairMemorySolutions();
             _globals.iteration++;
         }
     }
@@ -110,18 +111,22 @@ public class RouteSolver extends Thread implements DynamicListener {
             _globals.restartFoundBestIteration = _globals.iteration;
             _globals.trailMax = 1.0 / (_globals.rho * _globals.bestSoFar.getCost());
             _globals.trailMin = _globals.trailMax / (2.0 * _globals.graph.getNodes().size());
-            String message = String.format("Best tour found %05d, at iteration %05d, diversity %.2f", (int) _globals.bestSoFar.getCost(), _globals.iteration, statistics.getDiversity());
-            message += "\t\t[" + _globals.bestSoFar.getTour().get(0).getId();
-            for(int i = 1; i < _globals.bestSoFar.getTour().size(); i++) {
-                message += "->" + _globals.bestSoFar.getTour().get(i).getId();
-            }
-            message += "]";
-            System.out.println(message);
+            printBestSoFar();
         }
         if(iterationBestAnt.getCost() < _globals.restartBestAnt.getCost()) {
             _globals.restartBestAnt = iterationBestAnt.clone();
             _globals.restartFoundBestIteration = _globals.iteration;
         }
+    }
+
+    public void printBestSoFar() {
+        String message = String.format("Best tour found %05d, at iteration %05d, diversity %.2f", (int) _globals.bestSoFar.getCost(), _globals.iteration, statistics.getDiversity());
+        message += "\t\t[" + _globals.bestSoFar.getTour().get(0).getId();
+        for(int i = 1; i < _globals.bestSoFar.getTour().size(); i++) {
+            message += "->" + _globals.bestSoFar.getTour().get(i).getId();
+        }
+        message += "]";
+        //System.out.println(message);
     }
 
     public Ant findBestAnt() {
@@ -178,7 +183,7 @@ public class RouteSolver extends Thread implements DynamicListener {
             double branchFactor = calculateBranchingFactor();
             //System.out.println("Branch factor = " + branchFactor + " at iteration " + _globals.iteration);
             if(branchFactor < _globals.branchFactor && (_globals.iteration - _globals.restartFoundBestIteration) > 250) {
-                //System.out.println("Restarting System!");
+                //System.out.println(" ================== Restarting System! ================");
                 _globals.restartBestAnt = new Ant(_globals);
                 initPheromoneTrails(_globals.trailMax);
                 computeTotalInformation();
@@ -191,6 +196,7 @@ public class RouteSolver extends Thread implements DynamicListener {
         double min, max, cutoff, avg = 0.0;
         List<Double> numBranches = new ArrayList<>();
         for(Node node : _globals.targetNodes) {
+            if(Ant.fixed.contains(node)) continue;
             Set<Route> routes = _globals.routeManager.getRoutes(node.getId());
             if(routes != null && !routes.isEmpty()) {
                 max = Double.MAX_VALUE * -1.0;
@@ -216,27 +222,28 @@ public class RouteSolver extends Thread implements DynamicListener {
         for(Double branch : numBranches) {
             avg += branch;
         }
-        return (avg / (_globals.targetNodes.size() * 2.0));
+        return (avg / ((_globals.targetNodes.size() - Ant.fixed.size()) * 2.0));
     }
 
-    public Stack<Node> getResultRoute() {
-        return _globals.bestSoFar.getTour();
+    public void repairMemorySolutions() {
+        double cost = _globals.bestSoFar.getCost();
+        _globals.bestSoFar.computeCost();
+        if(cost != _globals.bestSoFar.getCost()) {
+            printBestSoFar();
+        }
+        _globals.restartBestAnt.computeCost();
+    }
+
+    public Stack<Node> getResultTour() {
+        Stack<Node> tour = new Stack<>();
+        for(Node node : _globals.bestSoFar.getTour()) {
+            tour.add(node);
+        }
+        return tour;
     }
 
     public Route getRoute(Node source, Node target) {
         return _globals.routeManager.getRoute(source.getId(), target.getId());
-    }
-
-    public double getResultCost() {
-        return _globals.bestSoFar.getCost();
-    }
-
-    public Ant getBestSoFar() {
-        return _globals.bestSoFar;
-    }
-
-    public RouteManager getRouteManager() {
-        return _globals.routeManager;
     }
 
     public void finish() {
@@ -249,13 +256,8 @@ public class RouteSolver extends Thread implements DynamicListener {
 
     @Override
     public void updatedWeights() {
-        System.out.println("Dynamic environment change");
+        //System.out.println("Dynamic environment changed, starting updating routes....");
         this._globals.routeManager.updateRoutes();
-        Ant ant = new Ant(_globals);
-        ant.nnTour();
-        _globals.bestSoFar = ant.clone();
-        _globals.restartBestAnt =  ant.clone();
-        _globals.foundBestIteration = _globals.iteration;
-        _globals.restartFoundBestIteration = _globals.iteration;
+        //System.out.println("Dynamic environment changed, ending updating routes....");
     }
 }
