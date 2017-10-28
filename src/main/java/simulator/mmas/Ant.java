@@ -20,6 +20,7 @@ public class Ant {
         tour = new Stack<>();
         visited = new HashSet<>();
         _globals = globals;
+        cost = Double.MAX_VALUE;
     }
 
     public static synchronized Stack<Node> getFixed(Node node, Collection<Node> toCopy) {
@@ -70,7 +71,7 @@ public class Ant {
         visited = new HashSet<>();
         Ant.getFixed(null, tour);
         Ant.getFixed(null, visited);
-        Node currentNode = _globals.sourceNode;
+        Node currentNode = tour.lastElement();
         while(tour.size() != _globals.targetNodes.size()) {
             Node nextNode = selectNextHeuristicNode(currentNode);
             if(nextNode == null) {
@@ -87,6 +88,10 @@ public class Ant {
     }
 
     private Node selectNextHeuristicNode(Node currentNode) {
+        //Route[] routes = new Route[_globals.nnListSize];
+        //for(int i = 0; i < _globals.nnListSize; i++) {
+        //    routes[i] = _globals.routeManager.getRoute(currentNode.getId(), _globals.nnList.get(currentNode).get(i).getId());
+        //}
         Route[] routes = _globals.routeManager.getRoutes(currentNode.getId()).toArray(new Route[] {});
         Double[] probabilities = new Double[routes.length];
         Double cumulativeSum = 0.0;
@@ -99,6 +104,7 @@ public class Ant {
             }
         }
         if(cumulativeSum <= 0.0) {
+            //return selectNextNearNode(currentNode);
             return null;
         } else {
             double rand = Math.random() * cumulativeSum;
@@ -114,6 +120,28 @@ public class Ant {
                 return routes[i].getTargetNode();
             }
         }
+    }
+
+    public void randomWalk() {
+        tour = new Stack<>();
+        tour.push(_globals.sourceNode);
+        visited.add(_globals.sourceNode);
+        for(Node node : _globals.targetNodes) {
+            if(!tour.contains(node)) {
+                tour.push(node);
+                visited.add(node);
+            }
+        }
+        tour.push(_globals.sourceNode);
+        for(int i = 1; i < tour.size() - 1; i++) {
+            int pos = (int) (Math.random() * tour.size());
+            pos = Math.max(1, pos);
+            pos = Math.min(tour.size() - 2, pos);
+            Node aux = tour.get(pos);
+            tour.set(pos, tour.get(i));
+            tour.set(i, aux);
+        }
+        computeCost();
     }
 
     public void computeCost() {
@@ -137,10 +165,6 @@ public class Ant {
 
     public void setTour(Stack<Node> tour) {
         this.tour = tour;
-    }
-
-    public void setVisited(Set<Node> visited) {
-        this.visited = visited;
     }
 
     public void setCost(double cost) {

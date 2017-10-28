@@ -59,20 +59,8 @@ public class Route extends Thread {
         this.total = total;
     }
 
-    public Node getSourceNode() {
-        return sourceNode;
-    }
-
-    public void setSourceNode(Node sourceNode) {
-        this.sourceNode = sourceNode;
-    }
-
     public Node getTargetNode() {
         return targetNode;
-    }
-
-    public void setTargetNode(Node targetNode) {
-        this.targetNode = targetNode;
     }
 
     public void calculateCost() {

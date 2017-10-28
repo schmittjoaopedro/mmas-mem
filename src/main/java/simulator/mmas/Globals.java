@@ -6,6 +6,7 @@ import simulator.utils.Timer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Globals {
 
@@ -16,6 +17,10 @@ public class Globals {
     public RouteManager routeManager;
 
     public List<Node> targetNodes;
+
+    public Map<Node, List<Node>> nnList;
+
+    public int nnListSize;
 
     public Ant[] ants;
 
@@ -49,12 +54,10 @@ public class Globals {
 
     public int uGb;
 
-    public Ant[] shortMemory;
-
     public Globals() {
         routeManager = new RouteManager(this);
         targetNodes = new ArrayList<>();
-        numberAnts = 30;
+        numberAnts = 25;
         alpha = 1.0;
         beta = 2.0;
         rho = 0.02;
@@ -65,10 +68,11 @@ public class Globals {
         restartFoundBestIteration = 0;
         foundBestIteration = 0;
         uGb = 25;
+        nnListSize = 20;
     }
 
     public double HEURISTIC(Route route) {
-        return 1.0 / route.getBestCost();
+        return 1.0 / (route.getBestCost() + 0.00001);
     }
 
 }

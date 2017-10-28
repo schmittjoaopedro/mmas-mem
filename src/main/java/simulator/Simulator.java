@@ -58,7 +58,7 @@ public class Simulator extends Thread {
                     }
                 }
                 timePass = System.currentTimeMillis() + routeSolver.getRoute(lastNode, currentNode).getBestCost().longValue();
-                System.out.println(" ---> Going to: " + currentNode.getId());
+                //System.out.println(" ---> Going to: " + currentNode.getId());
                 drawFull();
             }
             try {

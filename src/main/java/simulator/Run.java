@@ -71,7 +71,7 @@ public class Run {
 
         RouteSolver routeSolver = new RouteSolver(graph, graph.getNode(553), targets);
         Simulator simulator = new Simulator(graph, graph.getNode(553), targets, routeSolver);
-        DynamicGenerator dynamicGenerator = new DynamicGenerator(graph, 0.01, 10000, 50.0, 250.0);
+        DynamicGenerator dynamicGenerator = new DynamicGenerator(graph, 0.1, 20000, 50.0, 250.0);
         dynamicGenerator.setDynamicListener(routeSolver);
         simulator.start();
         routeSolver.start();
