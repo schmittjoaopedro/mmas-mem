@@ -46,9 +46,9 @@ public class Visualizer extends JFrame {
         this.pack();
         this.setLocationRelativeTo(null);
         this.add(stats, BorderLayout.SOUTH);
-        this.setSize(1200, 750);
         this.landmarks = landmarks;
-        //this.setExtendedState(this.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+        //this.setSize(1200, 750);
+        this.setExtendedState(this.getExtendedState() | JFrame.MAXIMIZED_BOTH);
         this.setVisible(true);
         try {
             Thread.sleep(1000);
