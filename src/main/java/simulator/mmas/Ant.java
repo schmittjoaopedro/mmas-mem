@@ -16,6 +16,8 @@ public class Ant {
 
     private double cost;
 
+    private static Random random = new Random(3);
+
     public Ant(Globals globals) {
         tour = new Stack<>();
         visited = new HashSet<>();
@@ -107,7 +109,7 @@ public class Ant {
             //return selectNextNearNode(currentNode);
             return null;
         } else {
-            double rand = Math.random() * cumulativeSum;
+            double rand = random.nextDouble() * cumulativeSum;
             int i = 0;
             double partialSum = probabilities[i];
             while (partialSum <= rand) {
@@ -134,7 +136,7 @@ public class Ant {
         }
         tour.push(_globals.sourceNode);
         for(int i = 1; i < tour.size() - 1; i++) {
-            int pos = (int) (Math.random() * tour.size());
+            int pos = (int) (random.nextDouble() * tour.size());
             pos = Math.max(1, pos);
             pos = Math.min(tour.size() - 2, pos);
             Node aux = tour.get(pos);

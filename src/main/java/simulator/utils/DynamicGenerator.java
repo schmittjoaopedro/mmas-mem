@@ -17,9 +17,11 @@ public class DynamicGenerator extends Thread {
 
     private Graph graph;
 
-    private Random random = new Random();
+    private Random random = new Random(1);
 
     private DynamicListener dynamicListener;
+
+    long nextTime;
 
     public DynamicGenerator(Graph graph, double magnitude, long frequency, double lowerBound, double upperBound) {
         this.graph = graph;
@@ -31,7 +33,7 @@ public class DynamicGenerator extends Thread {
 
     @Override
     public void run() {
-        long nextTime = System.currentTimeMillis();
+        nextTime = System.currentTimeMillis();
         while(true) {
             if(System.currentTimeMillis() > nextTime) {
                 for(Edge edge : graph.getEdges()) {
@@ -48,6 +50,23 @@ public class DynamicGenerator extends Thread {
                 }
             }
             try { Thread.sleep(100); } catch (Exception e) { e.printStackTrace(); }
+        }
+    }
+
+    public void loop(int t) {
+        if(t > nextTime) {
+            for(Edge edge : graph.getEdges()) {
+                if(random.nextDouble() < magnitude) {
+                    double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
+                    edge.setSpeed(prop);
+                } else {
+                    edge.setSpeed(edge.getOriginalSpeed());
+                }
+            }
+            nextTime = t + frequency;
+            if(this.getDynamicListener() != null) {
+                this.getDynamicListener().updatedWeights();
+            }
         }
     }
 

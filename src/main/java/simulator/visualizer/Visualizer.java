@@ -157,7 +157,9 @@ public class Visualizer extends JFrame {
             FontMetrics f = g.getFontMetrics();
             for (ViewEdge e : edgesV) {
                 float alpha = (float) ((graph.getEdge(Integer.parseInt(nodeV[e.i].name), Integer.parseInt(nodeV[e.j].name)).getSpeed() - min) / (max - min));
-                Color color = new Color(1.0f, 0.0f, 0.0f, alpha);
+                alpha = Math.max(alpha, 0);
+                alpha = Math.min(alpha, 1.0f);
+                Color color = new Color(1.0f, 1.0f, 0.0f, alpha);
                 g2.setPaint(color);
                 g2.setStroke(new BasicStroke(7 * alpha));
                 g.drawLine(nodeV[e.i].x, nodeV[e.i].y, nodeV[e.j].x, nodeV[e.j].y);
@@ -167,7 +169,7 @@ public class Visualizer extends JFrame {
                 g2.setStroke(new BasicStroke(3));
                 g.drawLine(nodeV[e.i].x, nodeV[e.i].y, nodeV[e.j].x, nodeV[e.j].y);
             }
-            g.setColor(Color.yellow);
+            g.setColor(Color.red);
             for (ViewEdge e : routesNotVisitedV) {
                 g2.setStroke(new BasicStroke(3));
                 g.drawLine(nodeV[e.i].x, nodeV[e.i].y, nodeV[e.j].x, nodeV[e.j].y);

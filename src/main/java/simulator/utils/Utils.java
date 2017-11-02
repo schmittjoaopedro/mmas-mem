@@ -1,6 +1,8 @@
 package simulator.utils;
 
 
+import simulator.mmas.Ant;
+
 import java.util.*;
 
 public class Utils {
@@ -29,5 +31,13 @@ public class Utils {
         return sortedMap;
     }
 
+    public static void sortAntArray(Ant[] ants) {
+        Arrays.sort(ants, new Comparator<Ant>() {
+            @Override
+            public int compare(Ant ant1, Ant ant2) {
+                return Double.compare(ant1.getCost(), ant2.getCost());
+            }
+        });
+    }
 
 }
