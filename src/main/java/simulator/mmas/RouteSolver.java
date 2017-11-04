@@ -20,7 +20,8 @@ public class RouteSolver extends Thread implements DynamicListener {
 
     private boolean useMemory = true;
 
-    public RouteSolver(Graph graph, Node sourceNode, List<Node> targetNodes, int trial, GenericStatistics genericStatistics) {
+    public RouteSolver(Graph graph, Node sourceNode, List<Node> targetNodes, int trial, GenericStatistics genericStatistics, boolean useMemory) {
+        this.useMemory = useMemory;
         _globals = new Globals();
         _globals.graph = graph;
         _globals.sourceNode = sourceNode;
@@ -38,7 +39,7 @@ public class RouteSolver extends Thread implements DynamicListener {
                 }
             }
         }
-        _globals.routeManager.updateRoutes();
+        _globals.routeManager.updateRoutes(false, 0);
         statistics = new Statistics(_globals, this);
         statistics.setTrial(trial);
         statistics.setGenericStatistics(genericStatistics);
@@ -104,7 +105,7 @@ public class RouteSolver extends Thread implements DynamicListener {
         _globals.restartFoundBestIteration = 1;
         _globals.foundBestIteration = 1;
         _globals.ants[0].nnTour();
-        _globals.bestSoFar = _globals.ants[0].clone();
+        _globals.bestSoFar = new Ant(_globals);
         _globals.trailMax = 1.0 / (_globals.rho * _globals.ants[0].getCost());
         _globals.trailMin = _globals.trailMax / (2.0 * _globals.targetNodes.size());
         initPheromoneTrails(_globals.trailMax);
@@ -200,7 +201,10 @@ public class RouteSolver extends Thread implements DynamicListener {
         } else {
             if(useMemory) {
                 memory.updateLongTermMemory();
-                pheromoneUpdate(memory.findLongTermBest());
+                memory.updateShortTermMemory();
+                for(Ant ant : memory.shortMemory) {
+                    pheromoneUpdate(ant);
+                }
             } else {
                 pheromoneUpdate(_globals.restartBestAnt);
             }
@@ -237,10 +241,10 @@ public class RouteSolver extends Thread implements DynamicListener {
     }
 
     private void searchControl() {
+        _globals.branchFactorValue = calculateBranchingFactor();
         if (_globals.iteration % 100 == 0) {
-            double branchFactor = calculateBranchingFactor();
             //System.out.println("Branch factor = " + branchFactor + " at iteration " + _globals.iteration);
-            if (branchFactor < _globals.branchFactor && (_globals.iteration - _globals.restartFoundBestIteration) > 250) {
+            if (_globals.branchFactorValue < _globals.branchFactor && (_globals.iteration - _globals.restartFoundBestIteration) > 250) {
                 //System.out.println(" ================== Restarting System! ================");
                 _globals.restartBestAnt = new Ant(_globals);
                 _globals.restartBestAnt.randomWalk();
@@ -302,6 +306,10 @@ public class RouteSolver extends Thread implements DynamicListener {
         return tour;
     }
 
+    public double getCost() {
+        return statistics.getCost();
+    }
+
     public Route getRoute(Node source, Node target) {
         return _globals.routeManager.getRoute(source.getId(), target.getId());
     }
@@ -315,9 +323,13 @@ public class RouteSolver extends Thread implements DynamicListener {
     }
 
     @Override
-    public void updatedWeights() {
+    public void updatedWeights(boolean cycled, int phase) {
         //System.out.println("Dynamic environment changed, starting updating routes....");
-        this._globals.routeManager.updateRoutes();
+        this._globals.routeManager.updateRoutes(cycled, phase);
         //System.out.println("Dynamic environment changed, ending updating routes....");
+    }
+
+    public Integer getIteration() {
+        return _globals.iteration;
     }
 }

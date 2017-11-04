@@ -12,7 +12,7 @@ public class Simulator {
 
     private Environment environment;
 
-    private Random random = new Random(1);
+    private Random random = new Random();
 
     public Simulator(Environment environment) {
         this.environment = environment;

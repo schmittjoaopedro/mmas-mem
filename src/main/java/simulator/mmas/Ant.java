@@ -16,7 +16,7 @@ public class Ant {
 
     private double cost;
 
-    private static Random random = new Random(3);
+    private static Random random = new Random();
 
     public Ant(Globals globals) {
         tour = new Stack<>();
@@ -148,8 +148,12 @@ public class Ant {
 
     public void computeCost() {
         cost = 0.0;
-        for(int i = 0; i < tour.size() - 1; i++) {
-            cost += _globals.routeManager.getRoute(tour.get(i).getId(), tour.get(i + 1).getId()).getBestCost();
+        if(tour.size() < _globals.targetNodes.size() - 1) {
+            cost = Double.MAX_VALUE;
+        } else {
+            for (int i = 0; i < tour.size() - 1; i++) {
+                cost += _globals.routeManager.getRoute(tour.get(i).getId(), tour.get(i + 1).getId()).getBestCost();
+            }
         }
     }
 

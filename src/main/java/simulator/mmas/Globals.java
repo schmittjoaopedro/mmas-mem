@@ -54,6 +54,8 @@ public class Globals {
 
     public int uGb;
 
+    public double branchFactorValue;
+
     public Globals() {
         routeManager = new RouteManager(this);
         targetNodes = new ArrayList<>();

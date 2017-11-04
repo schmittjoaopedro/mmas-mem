@@ -38,12 +38,6 @@ public class Statistics {
         this.routeSolver = routeSolver;
     }
 
-    public void calculateStatistics() {
-        //if(_globals.iteration % 100 == 0 && _globals.bestSoFar != null) {
-            printStatistics();
-        //}
-    }
-
     public void printStatistics() {
         double[] costs = new double[_globals.numberAnts];
         for (int a = 0; a < _globals.numberAnts; a++) {
@@ -53,14 +47,6 @@ public class Statistics {
         iterationBest.put(_globals.iteration, getBest(costs));
         iterationWorst.put(_globals.iteration, getWorst(costs));
         iterationBestSoFar.put(_globals.iteration, _globals.bestSoFar.getCost());
-        //Iteration, Mean, Best, Worst, Best so Far
-            /*String message = String.format("%05d, %05d, %05d, %05d, %05d,",
-                    _globals.iteration,
-                    (int) mean(costs),
-                    (int) getBest(costs),
-                    (int) getWorst(costs),
-                    (int) _globals.bestSoFar.getCost());*/
-        //System.out.println(message);
         int iter = _globals.iteration;
         int mean = (int) mean(costs);
         int best = (int) getBest(costs);
@@ -69,16 +55,40 @@ public class Statistics {
         int adjBsf = (int) getCost();
         double div = getDiversity();
         //String message = String.format(" -------> (Iter = %08d), (Mean = %08d), (Best = %08d), (Worst = %08d), (Bsf = %08d), (Div = %.2f)",
-        //String message = String.format(Locale.US, "%08d,%08d,%08d,%08d,%08d,%08d,%.2f,%.2f",
-        //        iter, mean, best, worst, bsf, adjBsf, div, routeSolver.calculateBranchingFactor());
-        //System.out.println(message);
+        String message = String.format(Locale.US, "%08d,%08d,%08d,%08d,%08d,%08d,%.2f,%.2f",
+                iter, mean, best, worst, bsf, adjBsf, div, routeSolver.calculateBranchingFactor());
+        System.out.println(message);
+    }
+
+    public void calculateStatistics() {
+        double[] costs = new double[_globals.numberAnts];
+        for (int a = 0; a < _globals.numberAnts; a++) {
+            costs[a] = _globals.ants[a].getCost();
+        }
+        iterationMean.put(_globals.iteration, mean((costs)));
+        iterationBest.put(_globals.iteration, getBest(costs));
+        iterationWorst.put(_globals.iteration, getWorst(costs));
+        iterationBestSoFar.put(_globals.iteration, _globals.bestSoFar.getCost());
+        int iter = _globals.iteration;
+        int mean = (int) mean(costs);
+        int best = (int) getBest(costs);
+        int worst = (int) getWorst(costs);
+        int bsf = (int) _globals.bestSoFar.getCost();
+        int adjBsf = (int) getCost();
+        double div = getDiversity();
+        if(_globals.iteration % 100 == 0 && _globals.bestSoFar != null) {
+            //String message = String.format(" -------> (Iter = %08d), (Mean = %08d), (Best = %08d), (Worst = %08d), (Bsf = %08d), (Div = %.2f)",
+            //String message = String.format(Locale.US, "%08d,%08d,%08d,%08d,%08d,%08d,%.2f,%.2f",
+            //        iter, mean, best, worst, bsf, adjBsf, div, routeSolver.calculateBranchingFactor());
+            //System.out.println(message);
+        }
         genericStatistics.addMean(iter, trial, mean);
         genericStatistics.addBest(iter, trial, best);
         genericStatistics.addWorst(iter, trial, worst);
         genericStatistics.addBestSoFar(iter, trial, bsf);
         genericStatistics.addBestSoFarAdj(iter, trial, adjBsf);
         genericStatistics.addDiv(iter, trial, div);
-        genericStatistics.addBranch(iter, trial, routeSolver.calculateBranchingFactor());
+        genericStatistics.addBranch(iter, trial, _globals.branchFactorValue);
     }
 
     public double getCost() {

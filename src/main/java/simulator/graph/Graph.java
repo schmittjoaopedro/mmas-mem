@@ -134,6 +134,9 @@ public class Graph {
         for(int nodeId : dijkstra.execute(origin, destination)) {
             nodes.add(getNode(nodeId));
         }
+        if(nodes.size() == 1) {
+            throw new RuntimeException("Invalid point " + origin.getId() + "->" + destination.getId());
+        }
         return nodes;
     }
 

@@ -57,9 +57,10 @@ public class RouteManager {
         return routesMapIndex.get(from + "->" + to);
     }
 
-    public void updateRoutes() {
+    public void updateRoutes(boolean cycled, int phase) {
         for(Route route : routes) {
-            route.calculateCost();
+            route.calculateCost(cycled, phase);
         }
     }
+
 }

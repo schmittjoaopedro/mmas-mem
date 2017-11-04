@@ -3,6 +3,8 @@ package simulator.utils;
 import simulator.graph.Edge;
 import simulator.graph.Graph;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class DynamicGenerator extends Thread {
@@ -17,11 +19,19 @@ public class DynamicGenerator extends Thread {
 
     private Graph graph;
 
-    private Random random = new Random(1);
+    private static Random random = new Random(100);
 
     private DynamicListener dynamicListener;
 
     long nextTime;
+
+    private boolean cycle = false;
+
+    private int periodLimit;
+
+    private int period;
+
+    private Map<Integer, Map<Edge, Double>> cycles;
 
     public DynamicGenerator(Graph graph, double magnitude, long frequency, double lowerBound, double upperBound) {
         this.graph = graph;
@@ -36,17 +46,30 @@ public class DynamicGenerator extends Thread {
         nextTime = System.currentTimeMillis();
         while(true) {
             if(System.currentTimeMillis() > nextTime) {
-                for(Edge edge : graph.getEdges()) {
-                    if(random.nextDouble() < magnitude) {
-                        double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
-                        edge.setSpeed(prop);
-                    } else {
-                        edge.setSpeed(edge.getOriginalSpeed());
+                if(cycle) {
+                    for(Map.Entry<Edge, Double> edgeCost : cycles.get(period).entrySet()) {
+                        edgeCost.getKey().setSpeed(edgeCost.getValue());
+                    }
+                    if(this.getDynamicListener() != null) {
+                        this.getDynamicListener().updatedWeights(cycle, period);
+                    }
+                    period++;
+                    if(period >= periodLimit) {
+                        period = 0;
+                    }
+                } else {
+                    for (Edge edge : graph.getEdges()) {
+                        if (random.nextDouble() < magnitude) {
+                            double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
+                            edge.setSpeed(prop);
+                        } else {
+                            edge.setSpeed(edge.getOriginalSpeed());
+                        }
                     }
                 }
                 nextTime = System.currentTimeMillis() + frequency;
                 if(this.getDynamicListener() != null) {
-                    this.getDynamicListener().updatedWeights();
+                    this.getDynamicListener().updatedWeights(cycle, period);
                 }
             }
             try { Thread.sleep(100); } catch (Exception e) { e.printStackTrace(); }
@@ -55,18 +78,31 @@ public class DynamicGenerator extends Thread {
 
     public void loop(int t) {
         if(t > nextTime) {
-            for(Edge edge : graph.getEdges()) {
-                if(random.nextDouble() < magnitude) {
-                    double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
-                    edge.setSpeed(prop);
-                } else {
-                    edge.setSpeed(edge.getOriginalSpeed());
+            if(cycle) {
+                for(Map.Entry<Edge, Double> edgeCost : cycles.get(period).entrySet()) {
+                    edgeCost.getKey().setSpeed(edgeCost.getValue());
+                }
+                if(this.getDynamicListener() != null) {
+                    this.getDynamicListener().updatedWeights(cycle, period);
+                }
+                period++;
+                if(period >= periodLimit) {
+                    period = 0;
+                }
+            } else {
+                for (Edge edge : graph.getEdges()) {
+                    if (random.nextDouble() < magnitude) {
+                        double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
+                        edge.setSpeed(prop);
+                    } else {
+                        edge.setSpeed(edge.getOriginalSpeed());
+                    }
+                }
+                if(this.getDynamicListener() != null) {
+                    this.getDynamicListener().updatedWeights(cycle, period);
                 }
             }
             nextTime = t + frequency;
-            if(this.getDynamicListener() != null) {
-                this.getDynamicListener().updatedWeights();
-            }
         }
     }
 
@@ -76,5 +112,23 @@ public class DynamicGenerator extends Thread {
 
     public void setDynamicListener(DynamicListener dynamicListener) {
         this.dynamicListener = dynamicListener;
+    }
+
+    public void setCycle(boolean cycle, int periodLimit) {
+        this.cycle = cycle;
+        this.cycles = new HashMap<>();
+        this.period = 0;
+        this.periodLimit = periodLimit;
+        for(int i = 0; i < periodLimit; i++) {
+            cycles.put(i, new HashMap<>());
+            for(Edge edge : graph.getEdges()) {
+                if(random.nextDouble() < magnitude) {
+                    double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
+                    cycles.get(i).put(edge, prop);
+                } else {
+                    cycles.get(i).put(edge, edge.getOriginalSpeed());
+                }
+            }
+        }
     }
 }

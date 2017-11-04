@@ -38,7 +38,7 @@ public class Simulator extends Thread {
         this.graph = graph;
         this.routeSolver = routeSolver;
         Set<Integer> ids = targetNodes.stream().map(Node::getId).collect(Collectors.toSet());
-        //this.visualizer = new Visualizer(graph, ids);
+        this.visualizer = new Visualizer(graph, ids);
         this.routesVisited = new HashMap<>();
     }
 
@@ -61,7 +61,7 @@ public class Simulator extends Thread {
                 }
                 timePass = System.currentTimeMillis() + routeSolver.getRoute(lastNode, currentNode).getBestCost().longValue();
                 //System.out.println(" ---> Going to: " + currentNode.getId());
-                //drawFull();
+                drawFull();
             }
             try {
                 Thread.sleep(100);
@@ -75,7 +75,7 @@ public class Simulator extends Thread {
     public void setup() {
         visitedPoints.add(currentNode);
         notVisitedPoints.remove(currentNode);
-        timePass = 1000;
+        timePass = 500;
     }
 
     public void loop(int t) {
@@ -93,13 +93,12 @@ public class Simulator extends Thread {
                 }
                 timePass = t + routeSolver.getRoute(lastNode, currentNode).getBestCost().longValue();
                 //System.out.println(" ---> Going to: " + currentNode.getId());
+                drawFull();
             }
         } else {
             routeSolver.finish();
         }
-        if(t % 200 == 0) {
-            //drawFull();
-        }
+        if(t % 100 == 0) { drawFull(); }
     }
 
     private void drawSimple() {
@@ -113,6 +112,7 @@ public class Simulator extends Thread {
         List<Integer> routeTour = new ArrayList<>();
         Set<Integer> visited = new HashSet<>();
         Stack<Node> tour = routeSolver.getResultTour();
+        visualizer.setStat("Cost = " + routeSolver.getCost() + " iteration " + routeSolver.getIteration());
         Set<Integer> traversed = new HashSet<>();
         for(int i = 1; i < tour.size(); i++) {
             Route route = routeSolver.getRoute(tour.get(i - 1), tour.get(i));

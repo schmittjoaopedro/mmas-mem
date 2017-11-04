@@ -61,7 +61,7 @@ public class MMASProgram {
 
     private static double branchingFactor;
 
-    private static Random random = new Random(1);
+    private static Random random = new Random();
 
     private static boolean useMIACO = false;
 
@@ -670,7 +670,7 @@ public class MMASProgram {
 
     private static boolean[] randomPoint;
 
-    private static Random randomEnv = new Random(2);
+    private static Random randomEnv = new Random();
 
     static void initialize_environment() {
         for (int i = 0; i < n; i++) {

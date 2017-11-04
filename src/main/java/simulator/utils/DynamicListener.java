@@ -2,6 +2,6 @@ package simulator.utils;
 
 public interface DynamicListener {
 
-    void updatedWeights();
+    void updatedWeights(boolean cycled, int phase);
 
 }

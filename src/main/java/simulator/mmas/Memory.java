@@ -7,9 +7,9 @@ import java.util.*;
 
 public class Memory {
 
-    public static int shortMemorySize = 6;
+    public static int shortMemorySize = 4;
 
-    public static int longMemorySize = 10;
+    public static int longMemorySize = 6;
 
     public static double immigrantRate = 0.4;
 
@@ -19,13 +19,13 @@ public class Memory {
 
     private boolean[] randomPoint;
 
-    private Ant[] shortMemory;
+    public Ant[] shortMemory;
 
-    private Ant[] longMemory;
+    public Ant[] longMemory;
 
     private Globals _globals;
 
-    private Random random = new Random(5);
+    private Random random = new Random();
 
     public Memory(Globals globals) {
         super();
@@ -92,6 +92,7 @@ public class Memory {
     public void updateMemoryEveryChange() {
         int index = -1;
         for (int i = 0; i < longMemorySize; i++) {
+            if(_globals.restartBestAnt.getCost() == longMemory[i].getCost()) return;
             if (randomPoint[i] == true) {
                 index = i;
                 randomPoint[i] = false;
@@ -159,7 +160,11 @@ public class Memory {
             immigrants[i] = generateMemoryBasedImmigrant();
 
         }
-        Ant[] antsPopulation = _globals.ants.clone();
+        Ant[] antsPopulation = new Ant[_globals.numberAnts + 1];
+        antsPopulation[0] = _globals.restartBestAnt;
+        for(int i = 1; i < _globals.numberAnts + 1; i++) {
+            antsPopulation[i] = _globals.ants[i - 1];
+        }
         Utils.sortAntArray(antsPopulation);
         for (int i = 0; i < shortMemorySize; i++) {
             shortMemory[i] = antsPopulation[i].clone();
@@ -167,6 +172,7 @@ public class Memory {
         for (int i = shortMemorySize - 1; i > shortMemorySize - imSize - 1; i--) {
             shortMemory[i] = immigrants[shortMemorySize - 1 - i];
         }
+        Utils.sortAntArray(shortMemory);
     }
 
     public Ant generateMemoryBasedImmigrant() {

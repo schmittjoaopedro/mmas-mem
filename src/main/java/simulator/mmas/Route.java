@@ -1,9 +1,12 @@
 package simulator.mmas;
 
+import simulator.Run;
 import simulator.graph.Graph;
 import simulator.graph.Node;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Route extends Thread {
 
@@ -21,10 +24,16 @@ public class Route extends Thread {
 
     private double total;
 
+    private Map<Integer, List<Node>> routeMemory;
+
+    private Map<Integer, Double> costMemory;
+
     public Route(Graph graph, Node sourceNode, Node targetNode) {
         this.graph = graph;
         this.sourceNode = sourceNode;
         this.targetNode = targetNode;
+        this.routeMemory = new HashMap<>();
+        this.costMemory = new HashMap<>();
     }
 
     public List<Node> getBestRoute() {
@@ -63,8 +72,21 @@ public class Route extends Thread {
         return targetNode;
     }
 
-    public void calculateCost() {
-        this.setBestRoute(graph.getBestRoute(sourceNode, targetNode));
-        this.setBestCost(graph.getTravelTime(this.getBestRoute()));
+    public void calculateCost(boolean cycled, int phase) {
+        if(cycled) {
+            if(!routeMemory.containsKey(phase)) {
+                this.setBestRoute(graph.getBestRoute(sourceNode, targetNode));
+                this.setBestCost(graph.getTravelTime(this.getBestRoute()));
+                this.routeMemory.put(phase, this.getBestRoute());
+                this.costMemory.put(phase, this.getBestCost());
+            } else {
+                this.setBestRoute(this.routeMemory.get(phase));
+                this.setBestCost(this.costMemory.get(phase));
+            }
+        } else {
+            this.setBestRoute(graph.getBestRoute(sourceNode, targetNode));
+            this.setBestCost(graph.getTravelTime(this.getBestRoute()));
+        }
+
     }
 }

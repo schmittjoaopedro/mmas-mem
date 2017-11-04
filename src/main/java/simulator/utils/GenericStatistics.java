@@ -26,9 +26,12 @@ public class GenericStatistics {
 
     private Map<Integer, Map<Integer, Double>> branch = new HashMap<>();
 
-    public GenericStatistics(int iterationSize, int trialSize) {
+    private String fileName;
+
+    public GenericStatistics(int iterationSize, int trialSize, String fileName) {
         this.iterationSize = iterationSize;
         this.trialSize = trialSize;
+        this.fileName = fileName;
         startStructure(mean);
         startStructure(worst);
         startStructure(best);
@@ -74,10 +77,10 @@ public class GenericStatistics {
 
     public void dispose() {
         try {
-            String file = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/statistics.csv";
+            String file = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/" + fileName + ".csv";
             FileWriter fileWriter = new FileWriter(file, true);
             fileWriter.append("iteration,mean,best,worst,bsf,bsfAdj,div,branch\n");
-            for(int i = 0; i < iterationSize - 1; i++) {
+            for(int i = 1; i < iterationSize - 1; i++) {
                 String message = String.format(Locale.US, "%08d,%08d,%08d,%08d,%08d,%08d,%.2f,%.2f\n",
                         i, (int) mapMean(mean.get(i)), (int) mapMean(best.get(i)), (int) mapMean(worst.get(i)),
                         (int) mapMean(bsf.get(i)), (int) mapMean(bsfAdj.get(i)), mapMean(div.get(i)), mapMean(branch.get(i)));
