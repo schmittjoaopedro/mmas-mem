@@ -1,7 +1,7 @@
 library(plotly)
 
-data <- read.csv(file = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/MMAS.csv")
-dataMem <- read.csv(file = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/MMAS-MEM.csv")
+data <- read.csv(file = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/MMAS_MEM-F_TSP-78_MAG-0.75_FREQ-500_PERIOD-2.csv")
+dataMem <- read.csv(file = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/MMAS_MEM-T_TSP-78_MAG-0.75_FREQ-500_PERIOD-2.csv")
 
 data$mean2 <- dataMem$mean
 plot_ly(data, x = ~iteration, y = ~mean, type = "scatter", mode = "lines", name = "MMAS") %>%

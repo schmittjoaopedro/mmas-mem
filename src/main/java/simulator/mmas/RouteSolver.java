@@ -179,7 +179,7 @@ public class RouteSolver extends Thread implements DynamicListener {
 //        }
 //        message += "]";
 //        System.out.println(message);
-        statistics.printStatistics();
+//        statistics.printStatistics();
     }
 
     public Ant findBestAnt() {

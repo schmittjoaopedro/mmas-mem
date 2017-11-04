@@ -74,11 +74,12 @@ public class Run {
         double upperBound = defaultSpeed * 1.7;
 
         String fileName = "MMAS" +
-                "_MEM-" + (cycle ? "T" : "F") +
+                "_MEM-" + (useMemory ? "T" : "F") +
                 "_TSP-" + tspSize +
                 "_MAG-" + magnitude +
                 "_FREQ-" + frequency +
                 "_PERIOD-" + periodLimit;
+        System.out.println("Analysis = " + fileName);
         GenericStatistics genericStatistics = new GenericStatistics(iterationSize, trialSize, fileName);
         for(int t = 0; t < trialSize; t++) {
 
@@ -119,6 +120,7 @@ public class Run {
         }
         genericStatistics.dispose();
         System.out.println("Finished");
+        System.gc();
     }
 
     private static void tsp46(Graph graph, List<Node> targets) {
