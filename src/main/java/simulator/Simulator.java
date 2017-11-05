@@ -123,7 +123,8 @@ public class Simulator extends Thread {
     }
 
     public void finish() {
-        this.visualizer.dispose();
+        if(printGraph)
+            this.visualizer.dispose();
     }
 
     private void drawFull() {

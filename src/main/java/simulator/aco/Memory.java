@@ -153,6 +153,7 @@ public class Memory {
     public boolean detectChange() {
         double totalBefore = 0.0;
         double totalAfter = 0.0;
+        repairLongMemory();
         for (int i = 0; i < longMemorySize; i++) {
             totalBefore += longMemory[i].getCost();
         }
@@ -164,6 +165,22 @@ public class Memory {
             return false;
         else
             return true;
+    }
+
+    public void repairLongMemory() {
+        for (int i = 0; i < longMemorySize; i++) {
+            boolean valid = true;
+            for(int j = 0; j < Ant.getFixed(null, null).size(); j++) {
+                if(longMemory[i].getTour().get(j) != Ant.getFixed(null, null).get(j)) {
+                    valid = false;
+                    break;
+                }
+            }
+            if(!valid) {
+                longMemory[i].randomWalk();
+                randomPoint[i] = true;
+            }
+        }
     }
 
 
@@ -229,15 +246,29 @@ public class Memory {
     }
 
     public Ant findLongTermBest() {
-        int index = 0;
-        double cost = longMemory[index].getCost();
-        for(int i = 1; i < longMemorySize; i++) {
-            if(longMemory[i].getCost() < cost) {
-                cost = longMemory[i].getCost();
-                index = i;
+        if(_globals.isMIACO()) {
+            int index = 0;
+            double cost = longMemory[index].getCost();
+            for (int i = 1; i < longMemorySize; i++) {
+                if (longMemory[i].getCost() < cost) {
+                    cost = longMemory[i].getCost();
+                    index = i;
+                }
             }
+            return longMemory[index];
         }
-        return longMemory[index];
+        if(_globals.isMMAS_MEM()) {
+            int index = 0;
+            double cost = _globals.ants[index].getCost();
+            for (int i = 1; i < _globals.numberAnts; i++) {
+                if (_globals.ants[i].getCost() < cost) {
+                    cost = _globals.ants[i].getCost();
+                    index = i;
+                }
+            }
+            return _globals.ants[index];
+        }
+        return null;
     }
 
     public void generatePheromoneMatrix() {

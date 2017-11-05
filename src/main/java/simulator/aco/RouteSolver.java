@@ -201,7 +201,7 @@ public class RouteSolver extends Thread implements DynamicListener {
     }
 
     public void printBestSoFar() {
-        statistics.printStatistics();
+//        statistics.printStatistics();
     }
 
     public Ant findBestAnt() {
@@ -223,7 +223,6 @@ public class RouteSolver extends Thread implements DynamicListener {
                 pheromoneUpdate(_globals.bestSoFar);
             } else {
                 if (_globals.isMMAS_MEM()) {
-                    memory.updateLongTermMemory();
                     memory.updateShortTermMemory();
                     for (Ant ant : memory.shortMemory) {
                         pheromoneUpdate(ant);

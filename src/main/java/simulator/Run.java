@@ -78,7 +78,7 @@ public class Run {
 
     public static void runSimulation(Algorithm algorithm, double magnitude, int frequency, boolean cycle, int periodLimit, int tspSize) {
 
-        int trialSize = 5;
+        int trialSize = 30;
         int iterationSize = 5000;
         double defaultSpeed = 1000.0;
 
@@ -101,7 +101,6 @@ public class Run {
         for(int t = 0; t < trialSize; t++) {
 
             System.out.println("Trial = " + t);
-            ClassLoader classLoader = Run.class.getClassLoader();
             String jsonFile = (new File("maps")).getAbsolutePath() + "/joinville.json";
             Graph graph = JSONConverter.readGraph(jsonFile);
             graph.setDefaultSpeed(defaultSpeed);
@@ -139,7 +138,7 @@ public class Run {
             }
             simulator.finish();
         }
-//        genericStatistics.dispose();
+        genericStatistics.dispose();
         System.out.println("Finished");
         System.gc();
     }
