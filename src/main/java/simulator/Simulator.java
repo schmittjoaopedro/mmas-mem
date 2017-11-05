@@ -2,8 +2,8 @@ package simulator;
 
 import simulator.graph.Graph;
 import simulator.graph.Node;
-import simulator.mmas.Route;
-import simulator.mmas.RouteSolver;
+import simulator.aco.Route;
+import simulator.aco.RouteSolver;
 import simulator.visualizer.Visualizer;
 
 import java.util.*;
@@ -29,7 +29,12 @@ public class Simulator extends Thread {
 
     long timePass = 10000;
 
-    public Simulator(Graph graph, Node sourceNode, List<Node> targetNodes, RouteSolver routeSolver) {
+    int stepSize;
+
+    boolean printGraph;
+
+    public Simulator(Graph graph, Node sourceNode, List<Node> targetNodes, RouteSolver routeSolver, int stepSize, boolean print) {
+        this.stepSize = stepSize;
         this.notVisitedPoints = new HashSet<>();
         this.notVisitedPoints.addAll(targetNodes);
         this.notVisitedPoints.remove(sourceNode);
@@ -38,8 +43,11 @@ public class Simulator extends Thread {
         this.graph = graph;
         this.routeSolver = routeSolver;
         Set<Integer> ids = targetNodes.stream().map(Node::getId).collect(Collectors.toSet());
-        this.visualizer = new Visualizer(graph, ids);
         this.routesVisited = new HashMap<>();
+        this.printGraph = print;
+        if(print) {
+            this.visualizer = new Visualizer(graph, ids);
+        }
     }
 
     @Override
@@ -75,7 +83,7 @@ public class Simulator extends Thread {
     public void setup() {
         visitedPoints.add(currentNode);
         notVisitedPoints.remove(currentNode);
-        timePass = 500;
+        timePass = stepSize;
     }
 
     public void loop(int t) {
@@ -91,22 +99,32 @@ public class Simulator extends Thread {
                         break;
                     }
                 }
-                timePass = t + routeSolver.getRoute(lastNode, currentNode).getBestCost().longValue();
+                timePass = t + stepSize;
                 //System.out.println(" ---> Going to: " + currentNode.getId());
-                drawFull();
+                if(printGraph) {
+//                drawFull();
+                    drawSimple();
+                }
             }
         } else {
             routeSolver.finish();
         }
-        if(t % 100 == 0) { drawFull(); }
+        if(t % 100 == 0 && printGraph) {
+//            drawFull();
+            drawSimple();
+        }
     }
 
     private void drawSimple() {
+        visualizer.setStat("Cost = " + routeSolver.getCost() + " iteration " + routeSolver.getIteration());
         visualizer.draw(
             routeSolver.getResultTour().stream().map(Node::getId).collect(Collectors.toList()).toArray(new Integer[] {}),
             visitedPoints.stream().map(Node::getId).collect(Collectors.toSet()), new HashSet<>());
     }
 
+    public void finish() {
+        this.visualizer.dispose();
+    }
 
     private void drawFull() {
         List<Integer> routeTour = new ArrayList<>();

@@ -1,6 +1,4 @@
-package simulator.mmas;
-
-import simulator.graph.Graph;
+package simulator.aco;
 
 import java.util.HashMap;
 import java.util.HashSet;

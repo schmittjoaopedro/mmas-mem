@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class DynamicGenerator extends Thread {
+public class DynamicEdgeGenerator extends Thread {
 
     private double magnitude;
 
@@ -19,7 +19,7 @@ public class DynamicGenerator extends Thread {
 
     private Graph graph;
 
-    private static Random random = new Random(100);
+    private Random random = new Random(100);
 
     private DynamicListener dynamicListener;
 
@@ -33,7 +33,7 @@ public class DynamicGenerator extends Thread {
 
     private Map<Integer, Map<Edge, Double>> cycles;
 
-    public DynamicGenerator(Graph graph, double magnitude, long frequency, double lowerBound, double upperBound) {
+    public DynamicEdgeGenerator(Graph graph, double magnitude, long frequency, double lowerBound, double upperBound) {
         this.graph = graph;
         this.magnitude = magnitude;
         this.frequency = frequency;

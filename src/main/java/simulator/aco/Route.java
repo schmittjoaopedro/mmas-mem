@@ -1,6 +1,5 @@
-package simulator.mmas;
+package simulator.aco;
 
-import simulator.Run;
 import simulator.graph.Graph;
 import simulator.graph.Node;
 

@@ -1,4 +1,4 @@
-package simulator.mmas;
+package simulator.aco;
 
 
 import simulator.graph.Node;

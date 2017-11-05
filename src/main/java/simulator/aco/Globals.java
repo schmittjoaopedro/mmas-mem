@@ -1,8 +1,7 @@
-package simulator.mmas;
+package simulator.aco;
 
 import simulator.graph.Graph;
 import simulator.graph.Node;
-import simulator.utils.Timer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +27,10 @@ public class Globals {
 
     public Ant restartBestAnt;
 
+    public Ant[] previousBest;
+
+    public Ant previousBestSoFarAnt;
+
     public int numberAnts;
 
     public int iteration;
@@ -46,6 +49,8 @@ public class Globals {
 
     public double trailMin;
 
+    public double trail0;
+
     public double alpha;
 
     public double beta;
@@ -56,9 +61,17 @@ public class Globals {
 
     public double branchFactorValue;
 
-    public Globals() {
+    public double q0;
+
+    public Algorithm algorithm;
+
+    public Globals(Algorithm algorithm) {
+        this.algorithm = algorithm;
         routeManager = new RouteManager(this);
         targetNodes = new ArrayList<>();
+    }
+
+    public void startParameters() {
         numberAnts = 25;
         alpha = 1.0;
         beta = 2.0;
@@ -71,6 +84,23 @@ public class Globals {
         foundBestIteration = 0;
         uGb = 25;
         nnListSize = 20;
+        q0 = 0.0;
+        if(isMIACO()) {
+            beta = 5.0;
+            numberAnts = 50;
+        }
+    }
+
+    public boolean isMMAS() {
+        return Algorithm.MMAS == this.algorithm;
+    }
+
+    public boolean isMMAS_MEM() {
+        return Algorithm.MMAS_MEM == this.algorithm;
+    }
+
+    public boolean isMIACO() {
+        return Algorithm.MIACO == this.algorithm;
     }
 
     public double HEURISTIC(Route route) {

@@ -1,4 +1,4 @@
-package simulator.mmas;
+package simulator.aco;
 
 import simulator.graph.Node;
 import simulator.utils.Utils;
@@ -7,13 +7,13 @@ import java.util.*;
 
 public class Memory {
 
-    public static int shortMemorySize = 4;
+    public static int shortMemorySize;
 
-    public static int longMemorySize = 6;
+    public static int longMemorySize;
 
-    public static double immigrantRate = 0.4;
+    public static double immigrantRate;
 
-    public static double pMi = 0.01;
+    public static double pMi;
 
     public int tM;
 
@@ -29,17 +29,28 @@ public class Memory {
 
     public Memory(Globals globals) {
         super();
+        _globals = globals;
+        if(_globals.isMMAS_MEM()) {
+            shortMemorySize = 4;
+            longMemorySize = 4;
+            immigrantRate = 0.4;
+            pMi = 0.01;
+        }
+        if(_globals.isMIACO()) {
+            shortMemorySize = 10;
+            longMemorySize = 4;
+            immigrantRate = 0.4;
+            pMi = 0.01;
+        }
         shortMemory = new Ant[shortMemorySize];
         longMemory = new Ant[longMemorySize];
         randomPoint = new boolean[longMemorySize];
-        _globals = globals;
     }
 
     public void initMemoryRandomly() {
         for (int i = 0; i < longMemorySize; i++) {
             longMemory[i] = new Ant(_globals);
             longMemory[i].randomWalk();
-            longMemory[i].computeCost();
             randomPoint[i] = true;
         }
         tM = 5 + ((int) (random.nextDouble() * 6.0));
@@ -91,29 +102,32 @@ public class Memory {
 
     public void updateMemoryEveryChange() {
         int index = -1;
+        Ant ant = null;
+        if(_globals.isMMAS_MEM()) ant = _globals.restartBestAnt;
+        if(_globals.isMIACO()) ant = _globals.previousBestSoFarAnt;
         for (int i = 0; i < longMemorySize; i++) {
-            if(_globals.restartBestAnt.getCost() == longMemory[i].getCost()) return;
+            if(ant.getCost() == longMemory[i].getCost()) return;
             if (randomPoint[i] == true) {
                 index = i;
                 randomPoint[i] = false;
                 break;
             }
         }
-        _globals.restartBestAnt.computeCost();
+        ant.computeCost();
         if (index != -1) {
-            longMemory[index] = _globals.restartBestAnt.clone();
+            longMemory[index] = ant.clone();
         } else {
             double closest = Integer.MAX_VALUE;
             int closestInd = -1;
             for (int i = 0; i < longMemorySize; i++) {
-                double d = distanceBetweenAnts(_globals.restartBestAnt, longMemory[i]);
+                double d = distanceBetweenAnts(ant, longMemory[i]);
                 if (closest > d) {
                     closest = d;
                     closestInd = i;
                 }
             }
-            if (_globals.restartBestAnt.getCost() < longMemory[closestInd].getCost()) {
-                longMemory[closestInd] = _globals.restartBestAnt;
+            if (ant.getCost() < longMemory[closestInd].getCost()) {
+                longMemory[closestInd] = ant;
             }
         }
     }
@@ -160,19 +174,44 @@ public class Memory {
             immigrants[i] = generateMemoryBasedImmigrant();
 
         }
-        Ant[] antsPopulation = new Ant[_globals.numberAnts + 1];
-        antsPopulation[0] = _globals.restartBestAnt;
-        for(int i = 1; i < _globals.numberAnts + 1; i++) {
-            antsPopulation[i] = _globals.ants[i - 1];
+        if(_globals.isMMAS_MEM()) {
+            Set<Ant> antsPopulation = new HashSet<>();
+            Set<Double> antsCosts = new HashSet<>();
+            antsPopulation.add(_globals.restartBestAnt);
+            antsCosts.add(_globals.restartBestAnt.getCost());
+            Utils.sortAntArray(_globals.ants);
+            for (Ant ant : _globals.ants) {
+                if(!antsCosts.contains(ant.getCost())) {
+                    antsPopulation.add(ant);
+                    antsCosts.add(ant.getCost());
+                }
+            }
+            if(antsPopulation.size() < shortMemorySize) {
+                for (Ant ant : _globals.ants) {
+                    if(!antsPopulation.contains(ant) && antsPopulation.size() < shortMemorySize) {
+                        antsPopulation.add(ant);
+                    }
+                }
+            }
+            Ant[] ants = antsPopulation.toArray(new Ant[] {});
+            Utils.sortAntArray(ants);
+            for (int i = 0; i < shortMemorySize; i++) {
+                shortMemory[i] = ants[i].clone();
+            }
+            for (int i = shortMemorySize - 1; i > shortMemorySize - imSize - 1; i--) {
+                shortMemory[i] = immigrants[shortMemorySize - 1 - i];
+            }
+            Utils.sortAntArray(shortMemory);
         }
-        Utils.sortAntArray(antsPopulation);
-        for (int i = 0; i < shortMemorySize; i++) {
-            shortMemory[i] = antsPopulation[i].clone();
+        if(_globals.isMIACO()) {
+            Utils.sortAntArray(_globals.ants);
+            for (int i = 0; i < shortMemorySize; i++) {
+                shortMemory[i] = _globals.ants[i].clone();
+            }
+            for (int i = shortMemorySize - 1; i > shortMemorySize - imSize - 1; i--) {
+                shortMemory[i] = immigrants[shortMemorySize - 1 - i];
+            }
         }
-        for (int i = shortMemorySize - 1; i > shortMemorySize - imSize - 1; i--) {
-            shortMemory[i] = immigrants[shortMemorySize - 1 - i];
-        }
-        Utils.sortAntArray(shortMemory);
     }
 
     public Ant generateMemoryBasedImmigrant() {
@@ -201,4 +240,22 @@ public class Memory {
         return longMemory[index];
     }
 
+    public void generatePheromoneMatrix() {
+        double deltaT = (1.0 - _globals.trail0) / (double) shortMemorySize;
+        for(Route route : _globals.routeManager.getRoutes()) {
+            route.setPheromone(_globals.trail0);
+        }
+        for (int i = 0; i < shortMemorySize; i++) {
+            constantPheromoneDeposit(shortMemory[i], deltaT);
+        }
+    }
+
+    private void constantPheromoneDeposit(Ant ant, double deltaT) {
+        for (int i = 0; i < ant.getTour().size() - 1; i++) {
+            int fromId = ant.getTour().get(i).getId();
+            int toId = ant.getTour().get(i + 1).getId();
+            Route route = _globals.routeManager.getRoute(fromId, toId);
+            route.setPheromone(route.getPheromone() + deltaT);
+        }
+    }
 }

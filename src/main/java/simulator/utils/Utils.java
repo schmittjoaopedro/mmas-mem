@@ -1,7 +1,7 @@
 package simulator.utils;
 
 
-import simulator.mmas.Ant;
+import simulator.aco.Ant;
 
 import java.util.*;
 

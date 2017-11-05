@@ -77,7 +77,7 @@ public class GenericStatistics {
 
     public void dispose() {
         try {
-            String file = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/" + fileName + ".csv";
+            String file = (new File("output")).getAbsolutePath() + "/" + fileName + ".csv";
             FileWriter fileWriter = new FileWriter(file, true);
             fileWriter.append("iteration,mean,best,worst,bsf,bsfAdj,div,branch\n");
             for(int i = 1; i < iterationSize - 1; i++) {

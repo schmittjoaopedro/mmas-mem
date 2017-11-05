@@ -11,7 +11,7 @@ public class LogFile {
         if(log) {
             try {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(
-                        "/home/joao/projects/master-degree/mmas-vrp/statistics/" + fromId + "->" + toId + ".txt", true));
+                        "/home/joao/projects/master-degree/aco-vrp/statistics/" + fromId + "->" + toId + ".txt", true));
                 bw.write(msg);
                 bw.newLine();
                 bw.flush();

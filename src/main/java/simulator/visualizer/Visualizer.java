@@ -44,11 +44,11 @@ public class Visualizer extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.stats = new JLabel();
         this.pack();
-        this.setLocationRelativeTo(null);
         this.add(stats, BorderLayout.SOUTH);
         this.landmarks = landmarks;
-        //this.setSize(1200, 750);
-        this.setExtendedState(this.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+        this.setSize(1200, 550);
+//        this.setExtendedState(this.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+        this.setLocationRelativeTo(null);
         this.setVisible(true);
         try {
             Thread.sleep(1000);

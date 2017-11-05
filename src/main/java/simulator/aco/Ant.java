@@ -1,4 +1,4 @@
-package simulator.mmas;
+package simulator.aco;
 
 import simulator.graph.Node;
 
@@ -57,8 +57,19 @@ public class Ant {
     }
 
     private Node selectNextNearNode(Node currentNode) {
-        Route[] routes = _globals.routeManager.getRoutes(currentNode.getId()).toArray(new Route[] {});
+        Route[] routes = new Route[_globals.nnListSize];
+        for(int i = 0; i < _globals.nnListSize; i++) {
+            routes[i] = _globals.routeManager.getRoute(currentNode.getId(), _globals.nnList.get(currentNode).get(i).getId());
+        }
         Route selectedRoute = null;
+        for(int i = 0; i < routes.length; i++) {
+            if(!visited.contains(routes[i].getTargetNode()) &&
+                    (selectedRoute == null || routes[i].getBestCost() < selectedRoute.getBestCost())) {
+                selectedRoute = routes[i];
+            }
+        }
+        if(selectedRoute != null) return selectedRoute.getTargetNode();
+        routes = _globals.routeManager.getRoutes(currentNode.getId()).toArray(new Route[] {});
         for(int i = 0; i < routes.length; i++) {
             if(!visited.contains(routes[i].getTargetNode()) &&
                     (selectedRoute == null || routes[i].getBestCost() < selectedRoute.getBestCost())) {
@@ -90,11 +101,13 @@ public class Ant {
     }
 
     private Node selectNextHeuristicNode(Node currentNode) {
-        //Route[] routes = new Route[_globals.nnListSize];
-        //for(int i = 0; i < _globals.nnListSize; i++) {
-        //    routes[i] = _globals.routeManager.getRoute(currentNode.getId(), _globals.nnList.get(currentNode).get(i).getId());
-        //}
-        Route[] routes = _globals.routeManager.getRoutes(currentNode.getId()).toArray(new Route[] {});
+        if(_globals.q0 > 0 && random.nextDouble() < _globals.q0) {
+            return selectNextNearNode(currentNode);
+        }
+        Route[] routes = new Route[_globals.nnListSize];
+        for(int i = 0; i < _globals.nnListSize; i++) {
+            routes[i] = _globals.routeManager.getRoute(currentNode.getId(), _globals.nnList.get(currentNode).get(i).getId());
+        }
         Double[] probabilities = new Double[routes.length];
         Double cumulativeSum = 0.0;
         for(int i = 0; i < routes.length; i++) {
@@ -106,8 +119,7 @@ public class Ant {
             }
         }
         if(cumulativeSum <= 0.0) {
-            //return selectNextNearNode(currentNode);
-            return null;
+            return selectNextNearNode(currentNode);
         } else {
             double rand = random.nextDouble() * cumulativeSum;
             int i = 0;
