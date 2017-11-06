@@ -16,62 +16,66 @@ public class Run {
 
     public static void main(String[] args) throws Exception {
 
-        runSimulation(Algorithm.MMAS, 0.1, 500, true, 4, 125);
-        runSimulation(Algorithm.MMAS_MEM, 0.1, 500, true, 4, 125);
-        runSimulation(Algorithm.MIACO, 0.1, 500, true, 4, 125);
-        runSimulation(Algorithm.MMAS, 0.1, 1000, true, 4, 125);
-        runSimulation(Algorithm.MMAS_MEM, 0.1, 1000, true, 4, 125);
-        runSimulation(Algorithm.MIACO, 0.1, 1000, true, 4, 125);
-        runSimulation(Algorithm.MMAS, 0.5, 500, true, 4, 125);
-        runSimulation(Algorithm.MMAS_MEM, 0.5, 500, true, 4, 125);
-        runSimulation(Algorithm.MIACO, 0.5, 500, true, 4, 125);
-        runSimulation(Algorithm.MMAS, 0.5, 1000, true, 4, 125);
-        runSimulation(Algorithm.MMAS_MEM, 0.5, 1000, true, 4, 125);
-        runSimulation(Algorithm.MIACO, 0.5, 1000, true, 4, 125);
         runSimulation(Algorithm.MMAS, 0.75, 500, true, 4, 125);
         runSimulation(Algorithm.MMAS_MEM, 0.75, 500, true, 4, 125);
         runSimulation(Algorithm.MIACO, 0.75, 500, true, 4, 125);
-        runSimulation(Algorithm.MMAS, 0.75, 1000, true, 4, 125);
-        runSimulation(Algorithm.MMAS_MEM, 0.75, 1000, true, 4, 125);
-        runSimulation(Algorithm.MIACO, 0.75, 1000, true, 4, 125);
-
-        runSimulation(Algorithm.MMAS, 0.1, 500, true, 4, 46);
-        runSimulation(Algorithm.MMAS_MEM, 0.1, 500, true, 4, 46);
-        runSimulation(Algorithm.MIACO, 0.1, 500, true, 4, 46);
-        runSimulation(Algorithm.MMAS, 0.1, 1000, true, 4, 46);
-        runSimulation(Algorithm.MMAS_MEM, 0.1, 1000, true, 4, 46);
-        runSimulation(Algorithm.MIACO, 0.1, 1000, true, 4, 46);
-        runSimulation(Algorithm.MMAS, 0.5, 500, true, 4, 46);
-        runSimulation(Algorithm.MMAS_MEM, 0.5, 500, true, 4, 46);
-        runSimulation(Algorithm.MIACO, 0.5, 500, true, 4, 46);
-        runSimulation(Algorithm.MMAS, 0.5, 1000, true, 4, 46);
-        runSimulation(Algorithm.MMAS_MEM, 0.5, 1000, true, 4, 46);
-        runSimulation(Algorithm.MIACO, 0.5, 1000, true, 4, 46);
+        runSimulation(Algorithm.MMAS, 0.75, 500, true, 4, 78);
+        runSimulation(Algorithm.MMAS_MEM, 0.75, 500, true, 4, 78);
+        runSimulation(Algorithm.MIACO, 0.75, 500, true, 4, 78);
         runSimulation(Algorithm.MMAS, 0.75, 500, true, 4, 46);
         runSimulation(Algorithm.MMAS_MEM, 0.75, 500, true, 4, 46);
         runSimulation(Algorithm.MIACO, 0.75, 500, true, 4, 46);
+
+        runSimulation(Algorithm.MMAS, 0.5, 500, true, 4, 125);
+        runSimulation(Algorithm.MMAS_MEM, 0.5, 500, true, 4, 125);
+        runSimulation(Algorithm.MIACO, 0.5, 500, true, 4, 125);
+        runSimulation(Algorithm.MMAS, 0.5, 500, true, 4, 78);
+        runSimulation(Algorithm.MMAS_MEM, 0.5, 500, true, 4, 78);
+        runSimulation(Algorithm.MIACO, 0.5, 500, true, 4, 78);
+        runSimulation(Algorithm.MMAS, 0.5, 500, true, 4, 46);
+        runSimulation(Algorithm.MMAS_MEM, 0.5, 500, true, 4, 46);
+        runSimulation(Algorithm.MIACO, 0.5, 500, true, 4, 46);
+
+        runSimulation(Algorithm.MMAS, 0.1, 500, true, 4, 125);
+        runSimulation(Algorithm.MMAS_MEM, 0.1, 500, true, 4, 125);
+        runSimulation(Algorithm.MIACO, 0.1, 500, true, 4, 125);
+        runSimulation(Algorithm.MMAS, 0.1, 500, true, 4, 78);
+        runSimulation(Algorithm.MMAS_MEM, 0.1, 500, true, 4, 78);
+        runSimulation(Algorithm.MIACO, 0.1, 500, true, 4, 78);
+        runSimulation(Algorithm.MMAS, 0.1, 500, true, 4, 46);
+        runSimulation(Algorithm.MMAS_MEM, 0.1, 500, true, 4, 46);
+        runSimulation(Algorithm.MIACO, 0.1, 500, true, 4, 46);
+
+        runSimulation(Algorithm.MMAS, 0.75, 1000, true, 4, 125);
+        runSimulation(Algorithm.MMAS_MEM, 0.75, 1000, true, 4, 125);
+        runSimulation(Algorithm.MIACO, 0.75, 1000, true, 4, 125);
+        runSimulation(Algorithm.MMAS, 0.75, 1000, true, 4, 78);
+        runSimulation(Algorithm.MMAS_MEM, 0.75, 1000, true, 4, 78);
+        runSimulation(Algorithm.MIACO, 0.75, 1000, true, 4, 78);
         runSimulation(Algorithm.MMAS, 0.75, 1000, true, 4, 46);
         runSimulation(Algorithm.MMAS_MEM, 0.75, 1000, true, 4, 46);
         runSimulation(Algorithm.MIACO, 0.75, 1000, true, 4, 46);
 
-        runSimulation(Algorithm.MMAS, 0.1, 500, true, 4, 78);
-        runSimulation(Algorithm.MMAS_MEM, 0.1, 500, true, 4, 78);
-        runSimulation(Algorithm.MIACO, 0.1, 500, true, 4, 78);
-        runSimulation(Algorithm.MMAS, 0.1, 1000, true, 4, 78);
-        runSimulation(Algorithm.MMAS_MEM, 0.1, 1000, true, 4, 78);
-        runSimulation(Algorithm.MIACO, 0.1, 1000, true, 4, 78);
-        runSimulation(Algorithm.MMAS, 0.5, 500, true, 4, 78);
-        runSimulation(Algorithm.MMAS_MEM, 0.5, 500, true, 4, 78);
-        runSimulation(Algorithm.MIACO, 0.5, 500, true, 4, 78);
+        runSimulation(Algorithm.MMAS, 0.5, 1000, true, 4, 125);
+        runSimulation(Algorithm.MMAS_MEM, 0.5, 1000, true, 4, 125);
+        runSimulation(Algorithm.MIACO, 0.5, 1000, true, 4, 125);
         runSimulation(Algorithm.MMAS, 0.5, 1000, true, 4, 78);
         runSimulation(Algorithm.MMAS_MEM, 0.5, 1000, true, 4, 78);
         runSimulation(Algorithm.MIACO, 0.5, 1000, true, 4, 78);
-        runSimulation(Algorithm.MMAS, 0.75, 500, true, 4, 78);
-        runSimulation(Algorithm.MMAS_MEM, 0.75, 500, true, 4, 78);
-        runSimulation(Algorithm.MIACO, 0.75, 500, true, 4, 78);
-        runSimulation(Algorithm.MMAS, 0.75, 1000, true, 4, 78);
-        runSimulation(Algorithm.MMAS_MEM, 0.75, 1000, true, 4, 78);
-        runSimulation(Algorithm.MIACO, 0.75, 1000, true, 4, 78);
+        runSimulation(Algorithm.MMAS, 0.5, 1000, true, 4, 46);
+        runSimulation(Algorithm.MMAS_MEM, 0.5, 1000, true, 4, 46);
+        runSimulation(Algorithm.MIACO, 0.5, 1000, true, 4, 46);
+
+        runSimulation(Algorithm.MMAS, 0.1, 1000, true, 4, 125);
+        runSimulation(Algorithm.MMAS_MEM, 0.1, 1000, true, 4, 125);
+        runSimulation(Algorithm.MIACO, 0.1, 1000, true, 4, 125);
+        runSimulation(Algorithm.MMAS, 0.1, 1000, true, 4, 78);
+        runSimulation(Algorithm.MMAS_MEM, 0.1, 1000, true, 4, 78);
+        runSimulation(Algorithm.MIACO, 0.1, 1000, true, 4, 78);
+        runSimulation(Algorithm.MMAS, 0.1, 1000, true, 4, 46);
+        runSimulation(Algorithm.MMAS_MEM, 0.1, 1000, true, 4, 46);
+        runSimulation(Algorithm.MIACO, 0.1, 1000, true, 4, 46);
+
 
 
     }
@@ -81,15 +85,8 @@ public class Run {
         int trialSize = 30;
         int iterationSize = 5000;
         double defaultSpeed = 1000.0;
-
-//        boolean useMemory = false;
-//        double magnitude = 0.75;
-//        int frequency = 500;
-//        boolean cycle = true;
-//        int periodLimit = 8;
-//        int tspSize = 125;
-        double lowerBound = defaultSpeed * 0.3;
-        double upperBound = defaultSpeed * 1.7;
+        double lowerBound = 0.3;
+        double upperBound = 1.7;
 
         String fileName = algorithm.name() +
                 "_TSP-" + tspSize +
@@ -97,6 +94,7 @@ public class Run {
                 "_FREQ-" + frequency +
                 "_PERIOD-" + periodLimit;
         System.out.println("Analysis = " + fileName);
+
         GenericStatistics genericStatistics = new GenericStatistics(iterationSize, trialSize, fileName);
         for(int t = 0; t < trialSize; t++) {
 
@@ -115,28 +113,25 @@ public class Run {
 
 
             RouteSolver routeSolver = new RouteSolver(graph, graph.getNode(553), targets, t, genericStatistics, algorithm);
-            Simulator simulator = new Simulator(graph, graph.getNode(553), targets, routeSolver, iterationSize / targets.size(), false);
+//            Simulator simulator = new Simulator(graph, graph.getNode(553), targets, routeSolver, iterationSize / targets.size(), false);
 //            DynamicEdgeGenerator dynamicEdgeGenerator = new DynamicEdgeGenerator(graph, magnitude, frequency, lowerBound, upperBound);
 //            dynamicEdgeGenerator.setDynamicListener(routeSolver);
 //            dynamicEdgeGenerator.setCycle(cycle, periodLimit);
-//            simulator.start();
-//            routeSolver.start();
-//            dynamicEdgeGenerator.start();
             DynamicRouteGenerator dynamicRouteGenerator = new DynamicRouteGenerator(magnitude, frequency, lowerBound, upperBound, routeSolver.getRoutes());
             dynamicRouteGenerator.setCycle(cycle, periodLimit);
 
-            simulator.setup();
+//            simulator.setup();
             routeSolver.setup();
             for (int i = 1; i < iterationSize; i++) {
 //                dynamicEdgeGenerator.loop(i);
                 dynamicRouteGenerator.loop(i);
                 routeSolver.loop(i);
-                simulator.loop(i);
-                if(i % 1000 == 0) {
+//                simulator.loop(i);
+                if(i % 100 == 0) {
                     System.out.println("Iteration = " + i);
                 }
             }
-            simulator.finish();
+//            simulator.finish();
         }
         genericStatistics.dispose();
         System.out.println("Finished");

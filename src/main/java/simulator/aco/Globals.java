@@ -17,7 +17,7 @@ public class Globals {
 
     public List<Node> targetNodes;
 
-    public Map<Node, List<Node>> nnList;
+    public Map<Node, Route[]> nnList;
 
     public int nnListSize;
 
@@ -40,8 +40,6 @@ public class Globals {
     public int foundBestIteration;
 
     public double branchFactor;
-
-    public double maxTime; // In seconds
 
     public double lambda;
 
@@ -76,7 +74,6 @@ public class Globals {
         alpha = 1.0;
         beta = 2.0;
         rho = 0.02;
-        maxTime = 10.0;
         branchFactor = 1.0001;
         lambda = 0.05;
         iteration = 0;
@@ -84,8 +81,8 @@ public class Globals {
         foundBestIteration = 0;
         uGb = 25;
         nnListSize = 20;
-        q0 = 0.0;
-        if(isMIACO()) {
+        if(isMIACO() || isMMAS_MEM()) {
+            q0 = 0.0;
             beta = 5.0;
             numberAnts = 50;
         }

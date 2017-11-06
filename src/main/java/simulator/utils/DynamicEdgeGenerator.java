@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class DynamicEdgeGenerator extends Thread {
+public class DynamicEdgeGenerator {
 
     private double magnitude;
 
@@ -39,41 +39,6 @@ public class DynamicEdgeGenerator extends Thread {
         this.frequency = frequency;
         this.upperBound = upperBound;
         this.lowerBound = lowerBound;
-    }
-
-    @Override
-    public void run() {
-        nextTime = System.currentTimeMillis();
-        while(true) {
-            if(System.currentTimeMillis() > nextTime) {
-                if(cycle) {
-                    for(Map.Entry<Edge, Double> edgeCost : cycles.get(period).entrySet()) {
-                        edgeCost.getKey().setSpeed(edgeCost.getValue());
-                    }
-                    if(this.getDynamicListener() != null) {
-                        this.getDynamicListener().updatedWeights(cycle, period);
-                    }
-                    period++;
-                    if(period >= periodLimit) {
-                        period = 0;
-                    }
-                } else {
-                    for (Edge edge : graph.getEdges()) {
-                        if (random.nextDouble() < magnitude) {
-                            double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
-                            edge.setSpeed(prop);
-                        } else {
-                            edge.setSpeed(edge.getOriginalSpeed());
-                        }
-                    }
-                }
-                nextTime = System.currentTimeMillis() + frequency;
-                if(this.getDynamicListener() != null) {
-                    this.getDynamicListener().updatedWeights(cycle, period);
-                }
-            }
-            try { Thread.sleep(100); } catch (Exception e) { e.printStackTrace(); }
-        }
     }
 
     public void loop(int t) {

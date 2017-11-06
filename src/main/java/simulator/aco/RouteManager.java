@@ -36,13 +36,6 @@ public class RouteManager {
         }
     }
 
-    public void removeRoute(int from, int to) {
-        Route route = getRoute(from, to);
-        routes.remove(route);
-        routesIndex.get(from).remove(route);
-        routesMapIndex.remove(from + "->" + to);
-    }
-
     public Set<Route> getRoutes() {
         return routes;
     }

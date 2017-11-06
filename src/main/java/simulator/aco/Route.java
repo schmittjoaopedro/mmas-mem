@@ -74,8 +74,9 @@ public class Route extends Thread {
     public void calculateCost(boolean cycled, int phase) {
         if(cycled) {
             if(!routeMemory.containsKey(phase)) {
-                this.setBestRoute(graph.getBestRoute(sourceNode, targetNode));
-                this.setBestCost(graph.getTravelTime(this.getBestRoute()));
+//                this.setBestRoute(graph.getBestRoute(sourceNode, targetNode));
+//                this.setBestCost(graph.getTravelTime(this.getBestRoute()));
+                this.setBestCost(calculateDistanceInMeters(sourceNode, targetNode));
                 this.routeMemory.put(phase, this.getBestRoute());
                 this.costMemory.put(phase, this.getBestCost());
             } else {
@@ -83,9 +84,23 @@ public class Route extends Thread {
                 this.setBestCost(this.costMemory.get(phase));
             }
         } else {
-            this.setBestRoute(graph.getBestRoute(sourceNode, targetNode));
-            this.setBestCost(graph.getTravelTime(this.getBestRoute()));
+            this.setBestCost(calculateDistanceInMeters(sourceNode, targetNode));
+//            this.setBestRoute(graph.getBestRoute(sourceNode, targetNode));
+//            this.setBestCost(graph.getTravelTime(this.getBestRoute()));
         }
+    }
 
+    public double calculateDistanceInMeters(Node from, Node to) {
+        double earthRadius = 6371000;
+        double dY = Math.toRadians(from.getY() - to.getY());
+        double dX = Math.toRadians(from.getX() - to.getX());
+        double a = Math.sin(dY / 2.0) * Math.sin(dY / 2.0) + Math.cos(Math.toRadians(from.getY())) * Math.cos(Math.toRadians(to.getY())) * Math.sin(dX / 2.0) * Math.sin(dX / 2.0);
+        double c = 2.0 * Math.atan2(Math.sqrt(a), Math.sqrt(1.0 - a));
+        return earthRadius * c + 1.0;
+    }
+
+    @Override
+    public String toString() {
+        return sourceNode.getId() + "->" + targetNode.getId() + " = " + this.getBestCost();
     }
 }

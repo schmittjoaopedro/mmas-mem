@@ -9,7 +9,7 @@ import simulator.visualizer.Visualizer;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Simulator extends Thread {
+public class Simulator {
 
     private Graph graph;
 
@@ -48,36 +48,6 @@ public class Simulator extends Thread {
         if(print) {
             this.visualizer = new Visualizer(graph, ids);
         }
-    }
-
-    @Override
-    public void run() {
-        timePass = System.currentTimeMillis() + 10000;
-        visitedPoints.add(currentNode);
-        notVisitedPoints.remove(currentNode);
-        while (!notVisitedPoints.isEmpty()) {
-            if(System.currentTimeMillis() > timePass) {
-                for(Node node : routeSolver.getResultTour()) {
-                    if(!visitedPoints.contains(node)) {
-                        routeSolver.addVisited(node);
-                        notVisitedPoints.remove(node);
-                        visitedPoints.add(node);
-                        lastNode = currentNode;
-                        currentNode = node;
-                        break;
-                    }
-                }
-                timePass = System.currentTimeMillis() + routeSolver.getRoute(lastNode, currentNode).getBestCost().longValue();
-                //System.out.println(" ---> Going to: " + currentNode.getId());
-                drawFull();
-            }
-            try {
-                Thread.sleep(100);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        routeSolver.finish();
     }
 
     public void setup() {

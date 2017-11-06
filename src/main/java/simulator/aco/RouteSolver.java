@@ -8,7 +8,7 @@ import simulator.utils.Utils;
 
 import java.util.*;
 
-public class RouteSolver extends Thread implements DynamicListener {
+public class RouteSolver implements DynamicListener {
 
     private Globals _globals;
 
@@ -40,23 +40,6 @@ public class RouteSolver extends Thread implements DynamicListener {
         statistics = new Statistics(_globals, this);
         statistics.setTrial(trial);
         statistics.setGenericStatistics(genericStatistics);
-    }
-
-    @Override
-    public void run() {
-        allocateAnts();
-        allocateStructures();
-        initTry();
-        while (execute) {
-            //computeNNList();
-            constructSolutions();
-            updateStatistics();
-            pheromoneTrailUpdate();
-            searchControl();
-            statistics.calculateStatistics();
-            repairSolutions();
-            _globals.iteration++;
-        }
     }
 
     public void setup() {
@@ -184,19 +167,17 @@ public class RouteSolver extends Thread implements DynamicListener {
         _globals.nnList = new HashMap<>();
         for (int i = 0; i < _globals.targetNodes.size(); i++) {
             int sourceId = _globals.targetNodes.get(i).getId();
-            Map<Integer, Double> positions = new HashMap<>();
-            for (int j = 0; j < _globals.targetNodes.size(); j++) {
-                if (i != j) {
-                    int targetId = _globals.targetNodes.get(j).getId();
-                    positions.put(targetId, _globals.routeManager.getRoute(sourceId, targetId).getBestCost());
-                }
+            Set<Route> routesLink = _globals.routeManager.getRoutes(sourceId);
+            TreeMap<Double, Integer> positions = new TreeMap<>();
+            for (Route route : routesLink) {
+                positions.put(route.getBestCost(), route.getTargetNode().getId());
             }
-            LinkedHashMap<Integer, Double> sortedPositions = Utils.sortHashMapByValues(positions);
-            Integer[] keys = sortedPositions.keySet().toArray(new Integer[] {});
-            _globals.nnList.put(_globals.targetNodes.get(i), new ArrayList<>());
+            Integer[] keys = positions.values().toArray(new Integer[] {});
+            Route[] routes = new Route[_globals.nnListSize];
             for (int r = 0; r < _globals.nnListSize; r++) {
-                _globals.nnList.get(_globals.targetNodes.get(i)).add(_globals.graph.getNode(keys[r]));
+                routes[r] = _globals.routeManager.getRoute(_globals.targetNodes.get(i).getId(), keys[r]);
             }
+            _globals.nnList.put(_globals.targetNodes.get(i), routes);
         }
     }
 
