@@ -58,7 +58,7 @@ public class DynamicEdgeGenerator {
                 for (Edge edge : graph.getEdges()) {
                     if (random.nextDouble() < magnitude) {
                         double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
-                        edge.setSpeed(prop);
+                        edge.setSpeed(prop * edge.getOriginalSpeed());
                     } else {
                         edge.setSpeed(edge.getOriginalSpeed());
                     }
@@ -89,7 +89,7 @@ public class DynamicEdgeGenerator {
             for(Edge edge : graph.getEdges()) {
                 if(random.nextDouble() < magnitude) {
                     double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
-                    cycles.get(i).put(edge, prop);
+                    cycles.get(i).put(edge, edge.getOriginalSpeed() * prop);
                 } else {
                     cycles.get(i).put(edge, edge.getOriginalSpeed());
                 }
