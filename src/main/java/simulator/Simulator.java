@@ -72,16 +72,16 @@ public class Simulator {
                 timePass = t + stepSize;
                 //System.out.println(" ---> Going to: " + currentNode.getId());
                 if(printGraph) {
-//                drawFull();
-                    drawSimple();
+                drawFull();
+//                    drawSimple();
                 }
             }
         } else {
             routeSolver.finish();
         }
         if(t % 100 == 0 && printGraph) {
-//            drawFull();
-            drawSimple();
+            drawFull();
+//            drawSimple();
         }
     }
 

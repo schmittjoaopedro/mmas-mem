@@ -20,8 +20,6 @@ public class GenericStatistics {
 
     private Map<Integer, Map<Integer, Double>> bsf = new HashMap<>();
 
-    private Map<Integer, Map<Integer, Double>> bsfAdj = new HashMap<>();
-
     private Map<Integer, Map<Integer, Double>> div = new HashMap<>();
 
     private Map<Integer, Map<Integer, Double>> branch = new HashMap<>();
@@ -36,7 +34,6 @@ public class GenericStatistics {
         startStructure(worst);
         startStructure(best);
         startStructure(bsf);
-        startStructure(bsfAdj);
         startStructure(div);
         startStructure(branch);
     }
@@ -63,10 +60,6 @@ public class GenericStatistics {
         this.bsf.get(iteration).put(trial, value);
     }
 
-    public void addBestSoFarAdj(Integer iteration, Integer trial, double value) {
-        this.bsfAdj.get(iteration).put(trial, value);
-    }
-
     public void addDiv(Integer iteration, Integer trial, double value) {
         this.div.get(iteration).put(trial, value);
     }
@@ -79,11 +72,20 @@ public class GenericStatistics {
         try {
             String file = (new File("output")).getAbsolutePath() + "/" + fileName + ".csv";
             FileWriter fileWriter = new FileWriter(file, true);
-            fileWriter.append("iteration,mean,best,worst,bsf,bsfAdj,div,branch\n");
+            String header = "iteration,mean,best,worst,bsf,div,branch";
+            for(int t = 0; t < trialSize; t++) {
+                header += ",mean_" + t;
+            }
+            header += "\n";
+            fileWriter.append(header);
             for(int i = 1; i < iterationSize - 1; i++) {
-                String message = String.format(Locale.US, "%08d,%08d,%08d,%08d,%08d,%08d,%.2f,%.2f\n",
+                String message = String.format(Locale.US, "%08d,%08d,%08d,%08d,%08d,%.2f,%.2f",
                         i, (int) mapMean(mean.get(i)), (int) mapMean(best.get(i)), (int) mapMean(worst.get(i)),
-                        (int) mapMean(bsf.get(i)), (int) mapMean(bsfAdj.get(i)), mapMean(div.get(i)), mapMean(branch.get(i)));
+                        (int) mapMean(bsf.get(i)), mapMean(div.get(i)), mapMean(branch.get(i)));
+                for(int t = 0; t < trialSize; t++) {
+                    message += String.format(Locale.US, ",%08d", bsf.get(i).get(t).intValue());
+                }
+                message += "\n";
                 fileWriter.append(message);
             }
             fileWriter.flush();

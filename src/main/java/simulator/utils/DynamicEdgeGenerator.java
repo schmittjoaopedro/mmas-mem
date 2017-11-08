@@ -19,7 +19,7 @@ public class DynamicEdgeGenerator {
 
     private Graph graph;
 
-    private Random random = new Random(100);
+    private Random random = new Random();
 
     private DynamicListener dynamicListener;
 

@@ -14,6 +14,8 @@ public class Ant {
 
     public static Stack<Node> fixed = new Stack<>();
 
+    public static Map<String, Double> costMap = new HashMap<>();
+
     private double cost;
 
     private static Random random = new Random();
@@ -154,8 +156,13 @@ public class Ant {
         if(tour.size() < _globals.targetNodes.size() - 1) {
             cost = Double.MAX_VALUE;
         } else {
-            for (int i = 0; i < tour.size() - 1; i++) {
-                cost += _globals.routeManager.getRoute(tour.get(i).getId(), tour.get(i + 1).getId()).getBestCost();
+            for (int i = 1; i < tour.size(); i++) {
+                String key = tour.get(i - 1).getId() + "->" + tour.get(i).getId();
+                if (costMap.containsKey(key)) {
+                    cost += costMap.get(key);
+                } else {
+                    cost += _globals.routeManager.getRoute(tour.get(i - 1).getId(), tour.get(i).getId()).getBestCost();
+                }
             }
         }
     }

@@ -24,6 +24,7 @@ public class RouteSolver implements DynamicListener {
         _globals.sourceNode = sourceNode;
         _globals.targetNodes = targetNodes;
         Ant.fixed.clear();
+        Ant.costMap.clear();
         Ant.getFixed(sourceNode, null);
         if (!targetNodes.contains(sourceNode)) {
             throw new RuntimeException("TargetNodes must contains SourceNode");
@@ -182,7 +183,7 @@ public class RouteSolver implements DynamicListener {
     }
 
     public void printBestSoFar() {
-//        statistics.printStatistics();
+        statistics.printStatistics();
     }
 
     public Ant findBestAnt() {
@@ -319,7 +320,7 @@ public class RouteSolver implements DynamicListener {
     }
 
     public double getCost() {
-        return statistics.getCost();
+        return _globals.bestSoFar.getCost();
     }
 
     public Route getRoute(Node source, Node target) {
@@ -331,6 +332,11 @@ public class RouteSolver implements DynamicListener {
     }
 
     public void addVisited(Node node) {
+        if(!Ant.getFixed(null, null).isEmpty()) {
+            Node last = Ant.getFixed(null, null).lastElement();
+            String key = last.getId() + "->" + node.getId();
+            Ant.costMap.put(key, _globals.routeManager.getRoute(last.getId(), node.getId()).getBestCost());
+        }
         Ant.getFixed(node, null);
     }
 

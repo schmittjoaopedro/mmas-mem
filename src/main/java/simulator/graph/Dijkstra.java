@@ -13,7 +13,7 @@ public class Dijkstra {
             Node u = vertexQueue.poll();
             for (Edge e : u.getEdges()) {
                 Node v = e.getTo();
-                double weight = e.getDistance();
+                double weight = e.getTimeSeconds();
                 double distanceThroughU = u.getMinDistance() + weight;
                 if (distanceThroughU < v.getMinDistance()) {
                     vertexQueue.remove(v);

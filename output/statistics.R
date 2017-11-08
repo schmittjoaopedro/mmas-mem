@@ -1,7 +1,7 @@
 library(plotly)
 
-pathName = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/Experiment4/"
-problem = "125" # 46, 78, 125
+pathName = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/"
+problem = "46" # 46, 78, 125
 mag = "0.5" # 0.1, 0.5, 0.75
 freq = "500" # 500, 1000
 
@@ -21,19 +21,20 @@ printBsf <- function(path, problem, mag, freq) {
     data$bsf3 <- dataMiaco$bsf
     plot_ly(data, x = ~iteration, y = ~bsf, type = "scatter", mode = "lines", name = "MMAS") %>%
         add_trace(y = ~bsf2, name = "MMAS_MEM", mode = "lines") %>%
-        add_trace(y = ~bsf3, name = "MIACO", mode = "lines")   
+        add_trace(y = ~bsf3, name = "MIACO", mode = "lines")
 }
 
 printBsfAdj <- function(path, problem, mag, freq) {
     data <- read.csv(file = paste(pathName, "MMAS_TSP-", problem, "_MAG-", mag, "_FREQ-", freq, "_PERIOD-4.csv", sep = ""))
     dataMem <- read.csv(file = paste(pathName, "MMAS_MEM_TSP-", problem, "_MAG-", mag, "_FREQ-", freq, "_PERIOD-4.csv", sep = ""))
     dataMiaco <- read.csv(file = paste(pathName, "MIACO_TSP-", problem, "_MAG-", mag, "_FREQ-", freq, "_PERIOD-4.csv", sep = ""))
-    
+    title = paste("Vertices =", problem, "Frequencia =", freq, "Magnitude = ",mag)
     data$bsfAdj2 <- dataMem$bsfAdj
     data$bsfAdj3 <- dataMiaco$bsfAdj
     plot_ly(data, x = ~iteration, y = ~bsfAdj, type = "scatter", mode = "lines", name = "MMAS") %>%
-        add_trace(y = ~bsfAdj2, name = "MMAS_MEM", mode = "lines") %>%
-        add_trace(y = ~bsfAdj3, name = "MIACO", mode = "lines")
+        layout(title = title, xaxis = list(title = "Fitness"), yaxis = list(title = "Iteration")) %>%
+        add_trace(y = ~bsfAdj2, name = "MMAS_MEM", mode = "lines")# %>%
+        #add_trace(y = ~bsfAdj3, name = "MIACO", mode = "lines")
 }
 
 printMean <- function(path, problem, mag, freq) {
@@ -91,8 +92,6 @@ printDiv <- function(path, problem, mag, freq) {
 
 
 printStats <- function(problem, mag, freq) {
-    pathName = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/"
-    
     data <- read.csv(file = paste(pathName, "MMAS_TSP-", problem, "_MAG-", mag, "_FREQ-", freq, "_PERIOD-4.csv", sep = ""))
     dataMem <- read.csv(file = paste(pathName, "MMAS_MEM_TSP-", problem, "_MAG-", mag, "_FREQ-", freq, "_PERIOD-4.csv", sep = ""))
     dataMiaco <- read.csv(file = paste(pathName, "MIACO_TSP-", problem, "_MAG-", mag, "_FREQ-", freq, "_PERIOD-4.csv", sep = ""))
