@@ -1,12 +1,12 @@
 library(plotly)
 
-pathName = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/"
-problem = "46" # 46, 78, 125
-mag = "0.5" # 0.1, 0.5, 0.75
-freq = "500" # 500, 1000
+pathName = "/home/joao/Área de Trabalho/Temp/Java/tests2/output/"
+problem = "125" # 46, 78, 125
+mag = "0.75" # 0.1, 0.5, 0.75
+freq = "1000" # 500, 1000
 
-printBsf(pathName, problem,mag,freq)
 printBsfAdj(pathName, problem,mag,freq)
+printBsf(pathName, problem,mag,freq)
 printMean(pathName, problem,mag,freq)
 printBest(pathName, problem,mag,freq)
 printWorst(pathName, problem,mag,freq)
@@ -29,11 +29,11 @@ printBsfAdj <- function(path, problem, mag, freq) {
     dataMem <- read.csv(file = paste(pathName, "MMAS_MEM_TSP-", problem, "_MAG-", mag, "_FREQ-", freq, "_PERIOD-4.csv", sep = ""))
     dataMiaco <- read.csv(file = paste(pathName, "MIACO_TSP-", problem, "_MAG-", mag, "_FREQ-", freq, "_PERIOD-4.csv", sep = ""))
     title = paste("Vertices =", problem, "Frequencia =", freq, "Magnitude = ",mag)
-    data$bsfAdj2 <- dataMem$bsfAdj
-    data$bsfAdj3 <- dataMiaco$bsfAdj
-    plot_ly(data, x = ~iteration, y = ~bsfAdj, type = "scatter", mode = "lines", name = "MMAS") %>%
-        layout(title = title, xaxis = list(title = "Fitness"), yaxis = list(title = "Iteration")) %>%
-        add_trace(y = ~bsfAdj2, name = "MMAS_MEM", mode = "lines")# %>%
+    data$bsf2 <- dataMem$bsf
+    data$bsf3 <- dataMiaco$bsf
+    plot_ly(data, x = ~iteration, y = ~bsf, type = "scatter", mode = "lines", name = "MMAS") %>%
+        layout(title = title, yaxis = list(title = "Fitness"), xaxis = list(title = "Iteração")) %>%
+        add_trace(y = ~bsf2, name = "MMAS_MEM", mode = "lines")# %>%
         #add_trace(y = ~bsfAdj3, name = "MIACO", mode = "lines")
 }
 
@@ -90,6 +90,13 @@ printDiv <- function(path, problem, mag, freq) {
 
 #####################################
 
+sdStats <- function(data) {
+    colSd <- c()
+    for(i in 1:dim(data)[1]) {
+        colSd <- c(colSd, sd(data[i,8:37]))
+    }
+    mean(colSd)
+}
 
 printStats <- function(problem, mag, freq) {
     data <- read.csv(file = paste(pathName, "MMAS_TSP-", problem, "_MAG-", mag, "_FREQ-", freq, "_PERIOD-4.csv", sep = ""))
@@ -97,9 +104,9 @@ printStats <- function(problem, mag, freq) {
     dataMiaco <- read.csv(file = paste(pathName, "MIACO_TSP-", problem, "_MAG-", mag, "_FREQ-", freq, "_PERIOD-4.csv", sep = ""))
     
     print(paste("Problem", problem, "Magnitude", mag, "Frequency", freq))
-    print(paste("MMAS     mean", mean(data$bsfAdj), "sd", sd(data$bsfAdj)))
-    print(paste("MMAS_MEM mean", mean(dataMem$bsfAdj), "sd", sd(dataMem$bsfAdj)))
-    print(paste("MIACO    mean", mean(dataMiaco$bsfAdj), "sd", sd(dataMiaco$bsfAdj)))
+    print(paste("MMAS     mean", mean(data$bsf), "sd", sdStats(data)))
+    print(paste("MMAS_MEM mean", mean(dataMem$bsf), "sd", sdStats(dataMem)))
+    print(paste("MIACO    mean", mean(dataMiaco$bsf), "sd", sdStats(dataMiaco)))
 }
 
 # 46, 78, 125
