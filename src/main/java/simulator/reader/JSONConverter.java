@@ -14,9 +14,8 @@ import java.util.Iterator;
 public class JSONConverter {
 
     public static Graph readGraph(String jsonFile) {
-        Graph graph = new Graph();
-
         try {
+            Graph graph = new Graph();
             FileInputStream fisTargetFile = new FileInputStream(new File(jsonFile));
             String fileContent = IOUtils.toString(fisTargetFile, "UTF-8");
             JsonParser parser = new JsonParser();

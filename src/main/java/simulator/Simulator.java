@@ -33,6 +33,8 @@ public class Simulator {
 
     boolean printGraph;
 
+    private double lastCost = 0;
+
     public Simulator(Graph graph, Node sourceNode, List<Node> targetNodes, RouteSolver routeSolver, int stepSize, boolean print) {
         this.stepSize = stepSize;
         this.notVisitedPoints = new HashSet<>();
@@ -79,7 +81,8 @@ public class Simulator {
         } else {
             routeSolver.finish();
         }
-        if(t % 100 == 0 && printGraph) {
+        if(printGraph && lastCost != routeSolver.getCost()) {
+            lastCost = routeSolver.getCost();
             drawFull();
 //            drawSimple();
         }

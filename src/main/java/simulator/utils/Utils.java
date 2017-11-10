@@ -2,6 +2,7 @@ package simulator.utils;
 
 
 import simulator.aco.Ant;
+import simulator.graph.Node;
 
 import java.util.*;
 
@@ -40,4 +41,9 @@ public class Utils {
         });
     }
 
+    public static double getEuclideanDistance(Node n1, Node n2) {
+        double x1 = n1.getX() - n2.getX();
+        double y1 = n1.getY() - n2.getY();
+        return Math.sqrt(x1 * x1 + y1 * y1);
+    }
 }
