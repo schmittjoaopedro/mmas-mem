@@ -74,9 +74,9 @@ public class Route extends Thread {
     public void calculateCost(boolean cycled, int phase) {
         if(cycled) {
             if(!routeMemory.containsKey(phase)) {
-//                this.setBestRoute(graph.getBestRoute(sourceNode, targetNode));
-//                this.setBestCost(graph.getTravelTime(this.getBestRoute()));
-                this.setBestCost(calculateDistanceInMeters(sourceNode, targetNode));
+                this.setBestRoute(graph.getBestRoute(sourceNode, targetNode));
+                this.setBestCost(graph.getTravelTime(this.getBestRoute()));
+//                this.setBestCost(calculateDistanceInMeters(sourceNode, targetNode));
                 this.routeMemory.put(phase, this.getBestRoute());
                 this.costMemory.put(phase, this.getBestCost());
             } else {
@@ -84,9 +84,9 @@ public class Route extends Thread {
                 this.setBestCost(this.costMemory.get(phase));
             }
         } else {
-            this.setBestCost(calculateDistanceInMeters(sourceNode, targetNode));
-//            this.setBestRoute(graph.getBestRoute(sourceNode, targetNode));
-//            this.setBestCost(graph.getTravelTime(this.getBestRoute()));
+//            this.setBestCost(calculateDistanceInMeters(sourceNode, targetNode));
+            this.setBestRoute(graph.getBestRoute(sourceNode, targetNode));
+            this.setBestCost(graph.getTravelTime(this.getBestRoute()));
         }
     }
 

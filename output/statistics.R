@@ -3,7 +3,7 @@ library(plotly)
 pathName = "/home/joao/Área de Trabalho/Temp/Java/tests2/output/"
 problem = "125" # 46, 78, 125
 mag = "0.75" # 0.1, 0.5, 0.75
-freq = "1000" # 500, 1000
+freq = "500" # 500, 1000
 
 printBsfAdj(pathName, problem,mag,freq)
 printBsf(pathName, problem,mag,freq)
@@ -132,3 +132,39 @@ printStats("125","0.5","500")
 printStats("125","0.5","1000")
 printStats("125","0.75","500")
 printStats("125","0.75","1000")
+
+
+##########################################################
+
+executeHypothesisTest <- function(problem, mag, freq) {
+    # http://data.library.virginia.edu/the-wilcoxon-rank-sum-test/
+    data <- read.csv(file = paste(pathName, "MMAS_TSP-", problem, "_MAG-", mag, "_FREQ-", freq, "_PERIOD-4.csv", sep = ""))
+    dataMem <- read.csv(file = paste(pathName, "MMAS_MEM_TSP-", problem, "_MAG-", mag, "_FREQ-", freq, "_PERIOD-4.csv", sep = ""))
+    parametricData <- data.frame(data = data$bsf, cat = "MMAS")
+    parametricData <- rbind(parametricData, data.frame(data = dataMem$bsf, cat = "MMAS-MEM"))
+    wilcox.test(data ~ cat, parametricData, conf.int = TRUE)
+}
+
+# 46, 78, 125
+# 0.1, 0.5, 0.75
+# 500, 1000
+executeHypothesisTest("46","0.1","500")
+executeHypothesisTest("46","0.1","1000")
+executeHypothesisTest("46","0.5","500")
+executeHypothesisTest("46","0.5","1000")
+executeHypothesisTest("46","0.75","500")
+executeHypothesisTest("46","0.75","1000")
+
+executeHypothesisTest("78","0.1","500")
+executeHypothesisTest("78","0.1","1000")
+executeHypothesisTest("78","0.5","500")
+executeHypothesisTest("78","0.5","1000")
+executeHypothesisTest("78","0.75","500")
+executeHypothesisTest("78","0.75","1000")
+
+executeHypothesisTest("125","0.1","500")
+executeHypothesisTest("125","0.1","1000")
+executeHypothesisTest("125","0.5","500")
+executeHypothesisTest("125","0.5","1000")
+executeHypothesisTest("125","0.75","500")
+executeHypothesisTest("125","0.75","1000")

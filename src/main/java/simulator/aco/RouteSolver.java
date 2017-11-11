@@ -183,7 +183,7 @@ public class RouteSolver implements DynamicListener {
     }
 
     public void printBestSoFar() {
-        statistics.printStatistics();
+//        statistics.printStatistics();
     }
 
     public Ant findBestAnt() {
@@ -255,9 +255,9 @@ public class RouteSolver implements DynamicListener {
         if(_globals.isMMAS() || _globals.isMMAS_MEM()) {
             _globals.branchFactorValue = calculateBranchingFactor();
             if (_globals.iteration % 100 == 0) {
-                //System.out.println("Branch factor = " + branchFactor + " at iteration " + _globals.iteration);
+//                System.out.println("Branch factor = " + _globals.branchFactorValue + " at iteration " + _globals.iteration);
                 if (_globals.branchFactorValue < _globals.branchFactor && (_globals.iteration - _globals.restartFoundBestIteration) > 250) {
-                    //System.out.println(" ================== Restarting System! ================");
+//                    System.out.println(" ================== Restarting System! ================");
                     _globals.restartBestAnt = new Ant(_globals);
                     _globals.restartBestAnt.randomWalk();
                     initPheromoneTrails(_globals.trailMax);
