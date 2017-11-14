@@ -141,8 +141,15 @@ public class RouteSolver implements DynamicListener {
                 _globals.restartBestAnt = iterationBestAnt.clone();
                 _globals.foundBestIteration = _globals.iteration;
                 _globals.restartFoundBestIteration = _globals.iteration;
-                _globals.trailMax = 1.0 / (_globals.rho * _globals.bestSoFar.getCost());
-                _globals.trailMin = _globals.trailMax / (2.0 * _globals.targetNodes.size());
+                //Type 1
+                double pX = Math.exp(Math.log(0.05) / _globals.targetNodes.size());
+                _globals.trailMin = 1. * (1. - pX) / (pX * (double) ((_globals.nnListSize + 1) / 2));
+                _globals.trailMax = 1. / ((_globals.rho) * _globals.bestSoFar.getCost());
+                _globals.trail0 = _globals.trailMax;
+                _globals.trailMin = _globals.trailMax * _globals.trailMin;
+                //Type 2
+                //_globals.trailMax = 1.0 / (_globals.rho * _globals.bestSoFar.getCost());
+                //_globals.trailMin = _globals.trailMax / (2.0 * _globals.targetNodes.size());
                 printBestSoFar();
             }
             if (iterationBestAnt.getCost() < _globals.restartBestAnt.getCost()) {
@@ -230,6 +237,10 @@ public class RouteSolver implements DynamicListener {
         }
     }
 
+    /**
+     * Restrição, a atualização contrária não é verdade
+     * @param ant
+     */
     private void pheromoneUpdate(Ant ant) {
         double dTau = 1.0 / ant.getCost();
         for (int i = 0; i < ant.getTour().size() - 1; i++) {
@@ -255,9 +266,9 @@ public class RouteSolver implements DynamicListener {
         if(_globals.isMMAS() || _globals.isMMAS_MEM()) {
             _globals.branchFactorValue = calculateBranchingFactor();
             if (_globals.iteration % 100 == 0) {
-//                System.out.println("Branch factor = " + _globals.branchFactorValue + " at iteration " + _globals.iteration);
+                //System.out.println("Branch factor = " + _globals.branchFactorValue + " at iteration " + _globals.iteration);
                 if (_globals.branchFactorValue < _globals.branchFactor && (_globals.iteration - _globals.restartFoundBestIteration) > 250) {
-//                    System.out.println(" ================== Restarting System! ================");
+                    //System.out.println(" ================== Restarting System! ================");
                     _globals.restartBestAnt = new Ant(_globals);
                     _globals.restartBestAnt.randomWalk();
                     initPheromoneTrails(_globals.trailMax);
@@ -273,8 +284,10 @@ public class RouteSolver implements DynamicListener {
         List<Double> numBranches = new ArrayList<>();
         for (Node node : _globals.targetNodes) {
             if (Ant.fixed.contains(node)) continue;
-            Set<Route> routes = _globals.routeManager.getRoutes(node.getId());
-            if (routes != null && !routes.isEmpty()) {
+            Route[] routes = _globals.nnList.get(node);
+            if (routes.length > 0) {
+            //Set<Route> routes = _globals.routeManager.getRoutes(node.getId());
+            //if (routes != null && !routes.isEmpty()) {
                 max = Double.MAX_VALUE * -1.0;
                 min = Double.MAX_VALUE;
                 for (Route route : routes) {

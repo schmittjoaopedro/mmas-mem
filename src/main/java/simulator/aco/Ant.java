@@ -122,7 +122,7 @@ public class Ant {
                 partialSum += probabilities[i];
             }
             if(i == routes.length) {
-                return null;
+                return selectNextNearNode(currentNode);
             } else {
                 return routes[i].getTargetNode();
             }

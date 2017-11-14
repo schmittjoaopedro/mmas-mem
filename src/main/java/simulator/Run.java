@@ -76,7 +76,7 @@ public class Run {
             RouteSolver routeSolver = new RouteSolver(graph, graph.getNode(startNode), targets, t, genericStatistics, programInstance.algorithm);
             Simulator simulator = null;
             if(programInstance.isSimulated)
-                new Simulator(graph, graph.getNode(startNode), targets, routeSolver, iterationSize / targets.size(), false);
+                simulator = new Simulator(graph, graph.getNode(startNode), targets, routeSolver, iterationSize / targets.size(), false);
 //            DynamicEdgeGenerator dynamicEdgeGenerator = new DynamicEdgeGenerator(graph, magnitude, frequency, lowerBound, upperBound);
 //            dynamicEdgeGenerator.setDynamicListener(routeSolver);
 //            dynamicEdgeGenerator.setCycle(cycle, periodLimit);
