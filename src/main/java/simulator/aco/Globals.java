@@ -81,10 +81,11 @@ public class Globals {
         foundBestIteration = 0;
         uGb = 25;
         nnListSize = 20;
-        if(isMIACO() || isMMAS_MEM()) {
+        if(isMIACO() || isMMAS_MEM() || isMMAS()) {
             q0 = 0.0;
             beta = 5.0;
             numberAnts = 50;
+            rho = 0.2;
         }
     }
 

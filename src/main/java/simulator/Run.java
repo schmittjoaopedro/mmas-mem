@@ -6,14 +6,12 @@ import simulator.graph.Graph;
 import simulator.graph.Node;
 import simulator.reader.JSONConverter;
 import simulator.reader.TSPConverter;
-import simulator.utils.DynamicRouteGenerator;
-import simulator.utils.GenericStatistics;
-import simulator.utils.ProgramInstance;
-import simulator.utils.ProgramReader;
+import simulator.utils.*;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class Run {
 
@@ -36,11 +34,10 @@ public class Run {
 
     public static void runSimulation(ProgramInstance programInstance) {
 
-        int trialSize = 30;
-        int iterationSize = 5000;
-        double defaultSpeed = 1000.0;
-        double lowerBound = 0.3;
-        double upperBound = 1.7;
+        int trialSize = 1;
+        int iterationSize = 1000;
+        double lowerBound = 0;
+        double upperBound = 2;
 
         Logger.getLogger(Run.class).info("Analysis = " + programInstance.fileName);
 
@@ -49,8 +46,8 @@ public class Run {
 
             Logger.getLogger(Run.class).info("Trial = " + t);
 
-            Graph graph = null;
-            int startNode = 0;
+            Graph graph;
+            int startNode;
             List<Node> targets = new ArrayList<>();
             if(programInstance.problemType.equals("TSP")) {
                 startNode = 1;
@@ -71,15 +68,13 @@ public class Run {
                     tsp125(graph, targets);
             }
 
-            graph.setDefaultSpeed(defaultSpeed);
-
             RouteSolver routeSolver = new RouteSolver(graph, graph.getNode(startNode), targets, t, genericStatistics, programInstance.algorithm);
             Simulator simulator = null;
             if(programInstance.isSimulated)
                 simulator = new Simulator(graph, graph.getNode(startNode), targets, routeSolver, iterationSize / targets.size(), false);
-//            DynamicEdgeGenerator dynamicEdgeGenerator = new DynamicEdgeGenerator(graph, magnitude, frequency, lowerBound, upperBound);
+//            DynamicEdgeGenerator dynamicEdgeGenerator = new DynamicEdgeGenerator(graph, programInstance.magnitude, programInstance.frequency, lowerBound, upperBound);
 //            dynamicEdgeGenerator.setDynamicListener(routeSolver);
-//            dynamicEdgeGenerator.setCycle(cycle, periodLimit);
+//            dynamicEdgeGenerator.setCycle(programInstance.cycle, programInstance.period);
             DynamicRouteGenerator dynamicRouteGenerator = new DynamicRouteGenerator(programInstance.magnitude, programInstance.frequency, lowerBound, upperBound, routeSolver.getRoutes(), programInstance.seed * t);
             dynamicRouteGenerator.setCycle(programInstance.cycle, programInstance.period);
 
@@ -94,6 +89,15 @@ public class Run {
                     Logger.getLogger(Run.class).info("Iteration = " + i);
                 }
             }
+            Stack<Node> result = routeSolver.getResultTour();
+            String resultRoute = "";
+            for(int i = 0; i < result.size(); i++) {
+                resultRoute += result.get(i).getId();
+                if(i < result.size() - 1) {
+                    resultRoute += "->";
+                }
+            }
+            Logger.getLogger(Run.class).info(resultRoute);
             if(simulator != null) simulator.finish();
         }
         genericStatistics.dispose();

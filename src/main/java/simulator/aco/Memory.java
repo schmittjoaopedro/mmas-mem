@@ -32,7 +32,7 @@ public class Memory {
         _globals = globals;
         if(_globals.isMMAS_MEM()) {
             shortMemorySize = 4;
-            longMemorySize = 4;
+            longMemorySize = 10;
             immigrantRate = 0.4;
             pMi = 0.01;
         }
@@ -52,6 +52,12 @@ public class Memory {
             longMemory[i] = new Ant(_globals);
             longMemory[i].randomWalk();
             randomPoint[i] = true;
+        }
+        if(_globals.isMMAS_MEM()) {
+            for (int i = 0; i < shortMemorySize; i++) {
+                shortMemory[i] = new Ant(_globals);
+                shortMemory[i].randomWalk();
+            }
         }
         tM = 5 + ((int) (random.nextDouble() * 6.0));
     }
@@ -189,13 +195,12 @@ public class Memory {
         Ant[] immigrants = new Ant[imSize];
         for (int i = 0; i < imSize; i++) {
             immigrants[i] = generateMemoryBasedImmigrant();
-
         }
         if(_globals.isMMAS_MEM()) {
             Set<Ant> antsPopulation = new HashSet<>();
             Set<Double> antsCosts = new HashSet<>();
-            antsPopulation.add(_globals.restartBestAnt);
-            antsCosts.add(_globals.restartBestAnt.getCost());
+            antsPopulation.add(_globals.bestSoFar);
+            antsCosts.add(_globals.bestSoFar.getCost());
             Utils.sortAntArray(_globals.ants);
             for (Ant ant : _globals.ants) {
                 if(!antsCosts.contains(ant.getCost())) {
@@ -213,7 +218,13 @@ public class Memory {
             Ant[] ants = antsPopulation.toArray(new Ant[] {});
             Utils.sortAntArray(ants);
             for (int i = 0; i < shortMemorySize; i++) {
-                shortMemory[i] = ants[i].clone();
+                shortMemory[i].computeCost();
+            }
+            Utils.sortAntArray(shortMemory);
+            for (int i = 0; i < shortMemorySize; i++) {
+                if(shortMemory[i].getCost() > ants[i].getCost()) {
+                    shortMemory[i] = ants[i].clone();
+                }
             }
             for (int i = shortMemorySize - 1; i > shortMemorySize - imSize - 1; i--) {
                 shortMemory[i] = immigrants[shortMemorySize - 1 - i];
@@ -288,5 +299,103 @@ public class Memory {
             Route route = _globals.routeManager.getRoute(fromId, toId);
             route.setPheromone(route.getPheromone() + deltaT);
         }
+    }
+
+    int rank(Stack<Node> tour, Node city){
+        int i = 0;
+        while(tour.get(i) != city)
+            i++;
+        if(i >= _globals.targetNodes.size())
+            return -1;
+        else
+            return i;
+    }
+
+    Ant inverOver(Ant ind){
+        double p = 1.0;
+        double gain = 0.0;
+        int step = 0;
+        Ant selected = new Ant(_globals);
+        int tempInd;
+        Node city1, city2;
+        int indexCity1Ind, indexCity2Ind, indexCity1TempInd, indexCity2TempInd;
+
+        Ant tempIndividual = new Ant(_globals);
+
+        Ant random = new Ant(_globals);
+        random.randomWalk();
+
+        tempIndividual = ind.clone();
+        indexCity1Ind = (int) (Math.random() * (_globals.targetNodes.size() - 1));
+
+        city1 = tempIndividual.getTour().get(indexCity1Ind);
+        while (true){
+            indexCity1Ind = rank(tempIndividual.getTour(), city1);
+            if (Math.random() <= p){
+                indexCity2Ind = (int) (Math.random() * (_globals.targetNodes.size() - 1));
+                city2 = tempIndividual.getTour().get(indexCity2Ind);
+                while(city2 == city1){
+                    indexCity2Ind = (int) (Math.random() * (_globals.targetNodes.size() - 1));
+                    city2 = tempIndividual.getTour().get(indexCity2Ind);
+                }
+            } else {
+                tempInd = (int) (Math.random() * _globals.numberAnts);
+                selected = _globals.ants[tempInd].clone();
+                while (selected == ind){
+                    tempInd = (int) (Math.random() * _globals.numberAnts);
+                    selected = _globals.ants[tempInd].clone();
+                }
+                indexCity1TempInd = rank(selected.getTour(), city1);
+                indexCity2TempInd = (indexCity1TempInd + 1) % _globals.targetNodes.size();
+                city2 = selected.getTour().get(indexCity2TempInd);
+                indexCity2Ind = rank(tempIndividual.getTour(), city2);
+            }
+            if (tempIndividual.getTour().get((indexCity1Ind + 1) % _globals.targetNodes.size()) == city2)
+                break;
+            gain += -_globals.routeManager.getRoute(city1.getId(), tempIndividual.getTour().get((indexCity1Ind + 1) % _globals.targetNodes.size()).getId()).getBestCost()
+                    -_globals.routeManager.getRoute(city2.getId(), tempIndividual.getTour().get((indexCity2Ind + 1) % _globals.targetNodes.size()).getId()).getBestCost()
+                    +_globals.routeManager.getRoute(city1.getId(), city2.getId()).getBestCost()
+                    +_globals.routeManager.getRoute(tempIndividual.getTour().get((indexCity1Ind + 1) % _globals.targetNodes.size()).getId(), tempIndividual.getTour().get((indexCity2Ind + 1) % _globals.targetNodes.size()).getId()).getBestCost();
+            step++;
+            //Inverse cities between indexCity1_Ind and indexCity2_Ind
+            int i, j;
+            Node temp;
+            if (indexCity1Ind < indexCity2Ind) {
+                for (i = indexCity1Ind + 1, j = indexCity2Ind; i < j; i++, j--) {
+                    temp = tempIndividual.getTour().get(i);
+                    tempIndividual.getTour().set(i, tempIndividual.getTour().get(j));
+                    tempIndividual.getTour().set(j, temp);
+                }
+            } else {
+                if (_globals.targetNodes.size() - 1 - indexCity1Ind <= indexCity2Ind + 1) {
+                    for (i = indexCity1Ind + 1, j = indexCity2Ind; i < _globals.targetNodes.size(); i++, j--) {
+                        temp = tempIndividual.getTour().get(i);
+                        tempIndividual.getTour().set(i, tempIndividual.getTour().get(j));
+                        tempIndividual.getTour().set(j, temp);
+                    }
+                    for (i = 0; i < j; i++, j--) {
+                        temp = tempIndividual.getTour().get(i);
+                        tempIndividual.getTour().set(i, tempIndividual.getTour().get(j));
+                        tempIndividual.getTour().set(j, temp);
+                    }
+                } else {
+                    for (i = indexCity1Ind + 1, j = indexCity2Ind; j >= 0; i++, j--) {
+                        temp = tempIndividual.getTour().get(i);
+                        tempIndividual.getTour().set(i, tempIndividual.getTour().get(j));
+                        tempIndividual.getTour().set(j, temp);
+                    }
+                    for (j = _globals.targetNodes.size() - 1; i < j; i++, j--) {
+                        temp = tempIndividual.getTour().get(i);
+                        tempIndividual.getTour().set(i, tempIndividual.getTour().get(j));
+                        tempIndividual.getTour().set(j, temp);
+                    }
+                }
+            }
+            city1 = city2;
+            //printTour(temp_individual->tour);
+        }
+        tempIndividual.getTour().set(_globals.targetNodes.size(), tempIndividual.getTour().get(0));
+        tempIndividual.computeCost();
+        return tempIndividual;
     }
 }

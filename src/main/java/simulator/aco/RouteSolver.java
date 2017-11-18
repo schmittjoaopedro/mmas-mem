@@ -190,7 +190,7 @@ public class RouteSolver implements DynamicListener {
     }
 
     public void printBestSoFar() {
-//        statistics.printStatistics();
+        statistics.printStatistics();
     }
 
     public Ant findBestAnt() {
@@ -243,6 +243,9 @@ public class RouteSolver implements DynamicListener {
      */
     private void pheromoneUpdate(Ant ant) {
         double dTau = 1.0 / ant.getCost();
+        if(_globals.isMMAS_MEM()) {
+            dTau = dTau / Memory.shortMemorySize;
+        }
         for (int i = 0; i < ant.getTour().size() - 1; i++) {
             int fromId = ant.getTour().get(i).getId();
             int toId = ant.getTour().get(i + 1).getId();

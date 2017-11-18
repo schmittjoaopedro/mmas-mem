@@ -145,8 +145,8 @@ public class Visualizer extends JFrame {
         Graphics2D g2 = (Graphics2D) g;
         double max = 0.0, min = Integer.MAX_VALUE;
         for(Edge edge : graph.getEdges()) {
-            max = Math.max(max, edge.getSpeed());
-            min = Math.min(min, edge.getSpeed());
+            max = Math.max(max, edge.getCost());
+            min = Math.min(min, edge.getCost());
         }
         if (edges != null) {
             ViewEdge edgesV[] = edges.toArray(new ViewEdge[] {});
@@ -156,7 +156,7 @@ public class Visualizer extends JFrame {
             ViewNode nodeV[] = nodes.toArray(new ViewNode[] {});
             FontMetrics f = g.getFontMetrics();
             for (ViewEdge e : edgesV) {
-                float alpha = (float) ((graph.getEdge(Integer.parseInt(nodeV[e.i].name), Integer.parseInt(nodeV[e.j].name)).getSpeed() - min) / (max - min));
+                float alpha = (float) ((graph.getEdge(Integer.parseInt(nodeV[e.i].name), Integer.parseInt(nodeV[e.j].name)).getCost() - min) / (max - min));
                 alpha = Math.max(alpha, 0);
                 alpha = Math.min(alpha, 1.0f);
                 Color color = new Color(1.0f, 1.0f, 0.0f, alpha);

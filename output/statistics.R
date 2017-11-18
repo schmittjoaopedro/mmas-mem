@@ -1,12 +1,12 @@
 library(plotly)
 
-pathName = "/home/joao/Área de Trabalho/Temp/Java/tests2/output/"
+pathName = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/"
 fileType = "TSP"
-fileSimulated = "false"
+fileSimulated = "true"
 fileNVertices = "200"
-fileFrequency = "1000"
-fileMagnitude = "0.75"
-fileSeed = "10"
+fileFrequency = "100"
+fileMagnitude = "0.1"
+fileSeed = "6"
 
 plotGraph("bsf")
 plotGraph("best")
@@ -61,7 +61,6 @@ printStats <- function() {
     print(paste("MMAS     mean", round(mean(dataMMAS$bsf), digits = 2), "sd", round(sdStats(dataMMAS), digits = 2)))
     print(paste("MMAS_MEM mean", round(mean(dataMMASMEM$bsf), digits = 2), "sd", round(sdStats(dataMMASMEM), digits = 2)))
 }
-
 
 #####################################
 

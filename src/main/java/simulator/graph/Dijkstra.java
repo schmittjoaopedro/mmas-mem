@@ -6,19 +6,19 @@ public class Dijkstra {
 
 
     public static void computePaths(Node source) {
-        source.setMinDistance(0.0);
+        source.setMinCost(0.0);
         PriorityQueue<Node> vertexQueue = new PriorityQueue<Node>();
         vertexQueue.add(source);
         while (!vertexQueue.isEmpty()) {
             Node u = vertexQueue.poll();
             for (Edge e : u.getEdges()) {
                 Node v = e.getTo();
-                double weight = e.getTimeSeconds();
-                double distanceThroughU = u.getMinDistance() + weight;
-                if (distanceThroughU < v.getMinDistance()) {
+                double weight = e.getCost();
+                double distanceThroughU = u.getMinCost() + weight;
+                if (distanceThroughU < v.getMinCost()) {
                     vertexQueue.remove(v);
 
-                    v.setMinDistance(distanceThroughU);
+                    v.setMinCost(distanceThroughU);
                     v.setPrevious(u);
                     vertexQueue.add(v);
                 }

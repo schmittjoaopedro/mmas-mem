@@ -156,12 +156,12 @@ public class Ant {
         if(tour.size() < _globals.targetNodes.size() - 1) {
             cost = Double.MAX_VALUE;
         } else {
-            for (int i = 1; i < tour.size(); i++) {
-                String key = tour.get(i - 1).getId() + "->" + tour.get(i).getId();
+            for (int i = 0; i < _globals.targetNodes.size(); i++) {
+                String key = tour.get(i).getId() + "->" + tour.get(i + 1).getId();
                 if (costMap.containsKey(key)) {
                     cost += costMap.get(key);
                 } else {
-                    cost += _globals.routeManager.getRoute(tour.get(i - 1).getId(), tour.get(i).getId()).getBestCost();
+                    cost += _globals.routeManager.getRoute(tour.get(i).getId(), tour.get(i + 1).getId()).getBestCost();
                 }
             }
         }

@@ -45,7 +45,7 @@ public class DynamicEdgeGenerator {
         if(t > nextTime) {
             if(cycle) {
                 for(Map.Entry<Edge, Double> edgeCost : cycles.get(period).entrySet()) {
-                    edgeCost.getKey().setSpeed(edgeCost.getValue());
+                    edgeCost.getKey().setCost(edgeCost.getValue());
                 }
                 if(this.getDynamicListener() != null) {
                     this.getDynamicListener().updatedWeights(cycle, period);
@@ -58,9 +58,9 @@ public class DynamicEdgeGenerator {
                 for (Edge edge : graph.getEdges()) {
                     if (random.nextDouble() < magnitude) {
                         double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
-                        edge.setSpeed(prop * edge.getOriginalSpeed());
+                        edge.setCost(edge.getOriginalCost() + (edge.getOriginalCost() * prop));
                     } else {
-                        edge.setSpeed(edge.getOriginalSpeed());
+                        edge.setCost(edge.getOriginalCost());
                     }
                 }
                 if(this.getDynamicListener() != null) {
@@ -89,9 +89,9 @@ public class DynamicEdgeGenerator {
             for(Edge edge : graph.getEdges()) {
                 if(random.nextDouble() < magnitude) {
                     double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
-                    cycles.get(i).put(edge, edge.getOriginalSpeed() * prop);
+                    cycles.get(i).put(edge, edge.getOriginalCost() + (edge.getOriginalCost() * prop));
                 } else {
-                    cycles.get(i).put(edge, edge.getOriginalSpeed());
+                    cycles.get(i).put(edge, edge.getOriginalCost());
                 }
             }
         }

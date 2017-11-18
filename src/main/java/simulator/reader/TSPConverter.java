@@ -22,7 +22,7 @@ public class TSPConverter {
                 }
                 if(started) {
                     String[] data = fileContent[l].split(" ");
-                    graph.addNode(Integer.valueOf(data[0]), Double.valueOf(data[1]), Double.valueOf(data[2]));
+                    graph.addNode(Integer.valueOf(data[0]) - 1, Double.valueOf(data[1]), Double.valueOf(data[2]));
                 }
                 if(fileContent[l].equals("NODE_COORD_SECTION")) {
                     started = true;

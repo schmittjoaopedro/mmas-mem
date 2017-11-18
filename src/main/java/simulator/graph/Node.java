@@ -17,7 +17,7 @@ public class Node implements Comparable<Node> {
     private Set<Edge> edges;
 
     // dijkstra
-    private Double minDistance = Double.POSITIVE_INFINITY;
+    private Double minCost = Double.POSITIVE_INFINITY;
 
     // dijkstra
     private Node previous;
@@ -55,12 +55,12 @@ public class Node implements Comparable<Node> {
         return this.edges;
     }
 
-    public Double getMinDistance() {
-        return minDistance;
+    public Double getMinCost() {
+        return minCost;
     }
 
-    public void setMinDistance(Double minDistance) {
-        this.minDistance = minDistance;
+    public void setMinCost(Double minCost) {
+        this.minCost = minCost;
     }
 
     public Node getPrevious() {
@@ -78,7 +78,7 @@ public class Node implements Comparable<Node> {
 
     @Override
     public int compareTo(Node node) {
-        return Double.compare(minDistance, node.getMinDistance());
+        return Double.compare(minCost, node.getMinCost());
     }
 
 }

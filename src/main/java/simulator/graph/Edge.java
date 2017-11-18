@@ -6,13 +6,9 @@ public class Edge {
 
     private Node to;
 
-    private double distance; //m
+    private double cost;
 
-    private double timeSeconds; //s
-
-    private double speed; //m/s
-
-    private Double originalSpeed = null;
+    private double originalCost;
 
     public Edge() {
         super();
@@ -34,38 +30,19 @@ public class Edge {
         this.to = to;
     }
 
-    public double getDistance() {
-        return distance;
+    public double getCost() {
+        return cost;
     }
 
-    public void setDistance(double distance) {
-        this.distance = distance;
+    public void setCost(double cost) {
+        this.cost = cost;
     }
 
-    public Double getTimeSeconds() {
-        return timeSeconds;
+    public double getOriginalCost() {
+        return originalCost;
     }
 
-    public void setTimeSeconds(Double timeSeconds) {
-        this.timeSeconds = timeSeconds;
+    public void setOriginalCost(double originalCost) {
+        this.originalCost = originalCost;
     }
-
-    public double getSpeed() {
-        return speed;
-    }
-
-    public void setOriginalSpeed(double speed) {
-        this.originalSpeed = speed;
-    }
-
-    public Double getOriginalSpeed() {
-        return originalSpeed;
-    }
-
-    public void setSpeed(double speed) {
-        this.speed = speed;
-        timeSeconds = (distance / speed) * 1000;
-
-    }
-
 }

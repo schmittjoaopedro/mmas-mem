@@ -47,7 +47,7 @@ public class Graph {
         return this.nodesIndex.get(id);
     }
 
-    public void addEdge(int idFrom, int idTo, double distance) {
+    public void addEdge(int idFrom, int idTo, double cost) {
         Node from = getNode(idFrom);
         Node to = getNode(idTo);
         if(from != null && to != null) {
@@ -55,7 +55,8 @@ public class Graph {
             edge.setFrom(from);
             from.getEdges().add(edge);
             edge.setTo(to);
-            edge.setDistance(distance);
+            edge.setCost(cost);
+            edge.setOriginalCost(cost);
             edges.add(edge);
         }
     }
@@ -112,21 +113,14 @@ public class Graph {
             graph.addNode(node.getId(), node.getX(), node.getY());
         }
         for(Edge edge : this.getEdges()) {
-            graph.addEdge(edge.getFrom().getId(), edge.getTo().getId(), edge.getDistance());
+            graph.addEdge(edge.getFrom().getId(), edge.getTo().getId(), edge.getCost());
         }
         return graph;
     }
 
-    public void setDefaultSpeed(Double speed) {
-        for(Edge edge : edges) {
-            edge.setOriginalSpeed(speed);
-            edge.setSpeed(speed);
-        }
-    }
-
     public List<Node> getBestRoute(Node origin, Node destination) {
         for(Node node : nodes) {
-            node.setMinDistance(Double.POSITIVE_INFINITY);
+            node.setMinCost(Double.POSITIVE_INFINITY);
             node.setPrevious(null);
         }
         Dijkstra dijkstra = new Dijkstra();
@@ -140,18 +134,10 @@ public class Graph {
         return nodes;
     }
 
-    public double getTravelTime(List<Node> route) {
+    public double getTravelCost(List<Node> route) {
         double time = 0;
         for(int i = 0; i < route.size() - 1; i++) {
-            time += getEdge(route.get(i).getId(), route.get(i + 1).getId()).getTimeSeconds();
-        }
-        return time;
-    }
-
-    public double getTravelDistance(List<Node> route) {
-        double time = 0;
-        for(int i = 0; i < route.size() - 1; i++) {
-            time += getEdge(route.get(i).getId(), route.get(i + 1).getId()).getDistance();
+            time += getEdge(route.get(i).getId(), route.get(i + 1).getId()).getCost();
         }
         return time;
     }

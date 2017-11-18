@@ -57,7 +57,7 @@ public class DynamicRouteGenerator {
             } else {
                 for (Route route : routes) {
                     if (random.nextDouble() < magnitude) {
-                        double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
+                        double prop = 1 + lowerBound + (random.nextDouble() * (upperBound - lowerBound));
                         route.setBestCost(originalCost.get(route) * prop);
                     } else {
                         route.setBestCost(originalCost.get(route));
@@ -82,7 +82,7 @@ public class DynamicRouteGenerator {
             int r = 0;
             for(Route route : routes) {
                 if(isRandom.get(r)) {
-                    double prop = lowerBound + (random.nextDouble() * (upperBound - lowerBound));
+                    double prop = 1 + lowerBound + (random.nextDouble() * (upperBound - lowerBound));
                     cycles.get(i).put(route, originalCost.get(route) * prop);
                 } else {
                     cycles.get(i).put(route, originalCost.get(route));
