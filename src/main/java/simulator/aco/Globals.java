@@ -70,9 +70,9 @@ public class Globals {
     }
 
     public void startParameters() {
-        numberAnts = 25;
+        numberAnts = 50;
         alpha = 1.0;
-        beta = 2.0;
+        beta = 5.0;
         rho = 0.02;
         branchFactor = 1.0001;
         lambda = 0.05;
@@ -81,11 +81,8 @@ public class Globals {
         foundBestIteration = 0;
         uGb = 25;
         nnListSize = 20;
-        if(isMIACO() || isMMAS_MEM() || isMMAS()) {
-            q0 = 0.0;
-            beta = 5.0;
-            numberAnts = 50;
-            rho = 0.2;
+        if(isMMAS()) {
+            rho = 0.8;
         }
     }
 

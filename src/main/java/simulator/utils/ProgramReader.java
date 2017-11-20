@@ -23,7 +23,6 @@ public class ProgramReader {
                 if(line != null && !line.trim().isEmpty() && !line.startsWith("#")) {
                     ProgramInstance instance = new ProgramInstance();
                     String[] values = line.split(";");
-                    instance.fileName = line.replaceAll(";", "_");
                     instance.problemType = values[0];
                     instance.isSimulated = Boolean.valueOf(values[1]);
                     instance.algorithm = Algorithm.valueOf(values[2]);
@@ -33,6 +32,10 @@ public class ProgramReader {
                     instance.period = Integer.valueOf(values[6]);
                     instance.nVertices = Integer.valueOf(values[7]);
                     instance.seed = Integer.valueOf(values[8]);
+                    instance.fileName = "" +
+                        instance.problemType + "_" + instance.isSimulated + "_" + instance.algorithm + "_" +
+                        instance.magnitude + "_" + instance.frequency + "_" + instance.cycle + "_" +
+                        instance.period + "_" + instance.nVertices;
                     instances.add(instance);
                 }
             }

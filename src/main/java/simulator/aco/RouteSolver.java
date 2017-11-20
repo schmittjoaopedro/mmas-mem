@@ -213,8 +213,8 @@ public class RouteSolver implements DynamicListener {
             } else {
                 if (_globals.isMMAS_MEM()) {
                     memory.updateShortTermMemory();
-                    for (Ant ant : memory.shortMemory) {
-                        pheromoneUpdate(ant);
+                    for (Ant k : memory.shortMemory) {
+                        pheromoneUpdate(k);
                     }
                 } else {
                     pheromoneUpdate(_globals.restartBestAnt);
@@ -243,9 +243,6 @@ public class RouteSolver implements DynamicListener {
      */
     private void pheromoneUpdate(Ant ant) {
         double dTau = 1.0 / ant.getCost();
-        if(_globals.isMMAS_MEM()) {
-            dTau = dTau / Memory.shortMemorySize;
-        }
         for (int i = 0; i < ant.getTour().size() - 1; i++) {
             int fromId = ant.getTour().get(i).getId();
             int toId = ant.getTour().get(i + 1).getId();
@@ -370,4 +367,10 @@ public class RouteSolver implements DynamicListener {
     public Set<Route> getRoutes() {
         return _globals.routeManager.getRoutes();
     }
+
+    public void adaptPheromone() {
+        if(_globals.isMMAS_MEM() && _globals.iteration % 10 == 0)
+            _globals.rho = 0.02 + (1.0 - statistics.getDiversity()) * (0.8 - 0.02);
+    }
+
 }

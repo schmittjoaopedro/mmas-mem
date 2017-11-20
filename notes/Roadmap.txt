@@ -1,0 +1,434 @@
+================================================================ Experimento-1
+Comparando o MMAS contra o MMAS-MEM com a seguinte parametrização (no servidor output_aco2):
+this.numberAnts = 50;
+this.alpha = 1.0D;
+this.beta = 5.0D;
+this.rho = 0.02D;
+this.branchFactor = 1.0001D;
+this.lambda = 0.05D;
+this.iteration = 0;
+this.restartFoundBestIteration = 0;
+this.foundBestIteration = 0;
+this.uGb = 25;
+this.nnListSize = 20;
+if(this.isMMAS()) {
+    this.rho = 0.8D;
+}
+if(isMMAS_MEM()) {
+    shortMemorySize = 4;
+    longMemorySize = 4;
+    immigrantRate = 0.4;
+    pMi = 0.01;
+}
+
+Usando os seguintes mecanismos:
+Formigas que irão atualizar feromônio:
+    this.memory.updateShortTermMemory();
+    Ant[] var1 = this.memory.shortMemory;
+    int var2 = var1.length;
+    for(int var3 = 0; var3 < var2; ++var3) {
+        Ant ant = var1[var3];
+        this.pheromoneUpdate(ant);
+    }
+Forma de depósito do feromônio:
+    double dTau = 1.0D / ant.getCost();
+    for(int i = 0; i < ant.getTour().size() - 1; ++i) {
+        int fromId = ((Node)ant.getTour().get(i)).getId();
+        int toId = ((Node)ant.getTour().get(i + 1)).getId();
+        Route route = this._globals.routeManager.getRoute(fromId, toId);
+        route.setPheromone(route.getPheromone() + dTau);
+    }
+Mecanismo de memória (que adiciona na memória somente formigas de melhor custo do que as atuais), bug a rota de curto tempo
+não está sendo reparada:
+        int imSize = (int)(immigrantRate * (double)shortMemorySize);
+        Ant[] immigrants = new Ant[imSize];
+        int i;
+        for(i = 0; i < imSize; ++i) {
+            immigrants[i] = this.generateMemoryBasedImmigrant();
+        }
+        Set<Ant> antsPopulation = new HashSet();
+        Set<Double> antsCosts = new HashSet();
+        antsPopulation.add(this._globals.restartBestAnt);
+        antsCosts.add(Double.valueOf(this._globals.restartBestAnt.getCost()));
+        Utils.sortAntArray(this._globals.ants);
+        Ant[] ants = this._globals.ants;
+        int i = ants.length;
+        int var7;
+        Ant ant;
+        for(var7 = 0; var7 < i; ++var7) {
+            ant = ants[var7];
+            if(!antsCosts.contains(Double.valueOf(ant.getCost()))) {
+                antsPopulation.add(ant);
+                antsCosts.add(Double.valueOf(ant.getCost()));
+            }
+        }
+        if(antsPopulation.size() < shortMemorySize) {
+            ants = this._globals.ants;
+            i = ants.length;
+            for(var7 = 0; var7 < i; ++var7) {
+                ant = ants[var7];
+                if(!antsPopulation.contains(ant) && antsPopulation.size() < shortMemorySize) {
+                    antsPopulation.add(ant);
+                }
+            }
+        }
+        ants = (Ant[])antsPopulation.toArray(new Ant[0]);
+        Utils.sortAntArray(ants);
+        for(i = 0; i < shortMemorySize; ++i) {
+            this.shortMemory[i].computeCost();
+        }
+        Utils.sortAntArray(this.shortMemory);
+        for(i = 0; i < shortMemorySize; ++i) {
+            if(this.shortMemory[i].getCost() > ants[i].getCost()) {
+                this.shortMemory[i] = ants[i].clone();
+            }
+        }
+        for(i = shortMemorySize - 1; i > shortMemorySize - imSize - 1; --i) {
+            this.shortMemory[i] = immigrants[shortMemorySize - 1 - i];
+        }
+        Utils.sortAntArray(this.shortMemory);
+
+Obtivemos as seguintes análises:
+TSP (100) sem movimento / Mag 0.1 / Freq: 10 -> MMAS_MEM fica melhor que o MMAS pela iteração 500 mantendo uma alta diversidade
+    [1] "Problem 100 Magnitude 0.1 Frequency 10"
+    [1] "MMAS     mean 24114.65 sd 737.96"
+    [1] "MMAS_MEM mean 23886.57 sd 581.99"
+TSP (100) sem movimento / Mag 0.5 / Freq: 10 -> MMAS_MEM fica melhor que o MMAS pela iteração 140 mantendo uma alta diversidade
+    [1] "Problem 100 Magnitude 0.5 Frequency 10"
+    [1] "MMAS     mean 31589.02 sd 1241.75"
+    [1] "MMAS_MEM mean 29682.51 sd 977.06"
+TSP (100) sem movimento / Mag 0.75 / Freq: 10 -> MMAS_MEM fica melhor que o MMAS pela iteração 140 mantendo uma alta diversidade
+    [1] "Problem 100 Magnitude 0.75 Frequency 10"
+    [1] "MMAS     mean 36863.85 sd 1426.99"
+    [1] "MMAS_MEM mean 34357.67 sd 1364.12"
+TSP (150) sem movimento / Mag 0.1 / Freq: 10 -> MMAS_MEM fica melhor que o MMAS pela iteração 960 mantendo uma alta diversidade
+    [1] "Problem 150 Magnitude 0.1 Frequency 10"
+    [1] "MMAS     mean 30244.53 sd 834.67"
+    [1] "MMAS_MEM mean 30890.32 sd 670.72"
+    ... Neste ponto eu encontrei o bug de que a rota não estava sendo reparada então eu parei as análises
+
+================================================================ Experimento-2
+Comparando em exeecução simples na minha máquina (1-trial) do MMAS contra o MMAS-MEM com a seguinte parametrização:
+numberAnts = 50;
+alpha = 1.0;
+beta = 5.0;
+rho = 0.02;
+branchFactor = 1.0001;
+lambda = 0.05;
+iteration = 0;
+restartFoundBestIteration = 0;
+foundBestIteration = 0;
+uGb = 25;
+nnListSize = 20;
+if(isMMAS()) {
+    rho = 0.8;
+}
+if(isMMAS_MEM()) {
+    shortMemorySize = 4;
+    longMemorySize = 4;
+    immigrantRate = 0.4;
+    pMi = 0.01;
+}
+
+Nesse experimento eu usei os seguintes mecânismos:
+Seleção das formigas para atualização do feromônio são feitas com base na memória de curto tempo somente (com evaporação):
+    memory.updateShortTermMemory();
+    for (Ant ant : memory.shortMemory) {
+        pheromoneUpdate(ant);
+    }
+Atualização do ferômonio considera o custo da rota de cada formiga da memória de curto tempo:
+    double dTau = 1.0 / ant.getCost();
+    for (int i = 0; i < ant.getTour().size() - 1; i++) {
+        int fromId = ant.getTour().get(i).getId();
+        int toId = ant.getTour().get(i + 1).getId();
+        Route route = _globals.routeManager.getRoute(fromId, toId);
+        route.setPheromone(route.getPheromone() + dTau);
+    }
+Mecânismo de atualização da memória de curto tempo, é feito a cada iterção a seleção do restartBest na primeira posição,
+nas posições intermediárias são selecionadas as melhores formigas da iterção e adicionado por último um imigrante com swap
+de posições aleatórias a uma taxa de 0.1
+    int imSize = (int) (immigrantRate * shortMemorySize);
+    Ant[] immigrants = new Ant[imSize];
+    for (int i = 0; i < imSize; i++) {
+        immigrants[i] = generateMemoryBasedImmigrant();
+    }
+    Set<Ant> antsPopulation = new HashSet<>();
+    Set<Double> antsCosts = new HashSet<>();
+    antsPopulation.add(_globals.restartBestAnt);
+    antsCosts.add(_globals.restartBestAnt.getCost());
+    Utils.sortAntArray(_globals.ants);
+    for (Ant ant : _globals.ants) {
+        if(!antsCosts.contains(ant.getCost())) {
+            antsPopulation.add(ant);
+            antsCosts.add(ant.getCost());
+        }
+    }
+    if(antsPopulation.size() < shortMemorySize) {
+        for (Ant ant : _globals.ants) {
+            if(!antsPopulation.contains(ant) && antsPopulation.size() < shortMemorySize) {
+                antsPopulation.add(ant);
+            }
+        }
+    }
+    Ant[] ants = antsPopulation.toArray(new Ant[] {});
+    Utils.sortAntArray(ants);
+    for (int i = 0; i < shortMemorySize; i++) {
+        shortMemory[i] = ants[i].clone();
+    }
+    for (int i = shortMemorySize - 1; i > shortMemorySize - imSize - 1; i--) {
+        shortMemory[i] = immigrants[shortMemorySize - 1 - i];
+    }
+    Utils.sortAntArray(shortMemory);
+
+Avaliação dos resultados obtidos:
+X - TSP (100) com movimento / Mag 0.1 / Freq: 10 -> MMAS foi melhor do que o MMAS_MEM
+    [1] "Problem 100 Magnitude 0.1 Frequency 10"
+    [1] "MMAS     mean 23915.55 sd 0"
+    [1] "MMAS_MEM mean 24415.38 sd 0"
+X - TSP (100) com movimento / Mag 0.5 / Freq: 10 -> MMAS a partir da iteração 500 foi bem melhor que o MMAS_MEM
+    [1] "Problem 100 Magnitude 0.5 Frequency 10"
+    [1] "MMAS     mean 30585.88 sd 0"
+    [1] "MMAS_MEM mean 32428.88 sd 0"
+X - TSP (100) com movimento / Mag 0.75 / Freq: 10 -> MMAS foi melhor que o MMAS_MEM a partir da metade
+    [1] "Problem 100 Magnitude 0.75 Frequency 10"
+    [1] "MMAS     mean 36955.98 sd 0"
+    [1] "MMAS_MEM mean 37067.67 sd 0"
+X - TSP (150) com movimento / Mag 0.1 / Freq: 10 -> MMAS_MEM teve dificuldades em convergir, possívelmente devido a baixa evaporação do feromônio e baixa magnitude (favorecendo o MMAS)
+    [1] "Problem 150 Magnitude 0.1 Frequency 10"
+    [1] "MMAS     mean 30656.77 sd 0"
+    [1] "MMAS_MEM mean 31507.33 sd 0"
+O - TSP (150) com movimento / Mag 0.5 / Freq: 10 -> MMAS_MEM obteve melhores resultados, possívelmente devido a baixa sensibilidade de mudança desafiada pelo MMAS pelas altas taixas de evaporação em ambientes de maior magnitude
+    [1] "Problem 150 Magnitude 0.5 Frequency 10"
+    [1] "MMAS     mean 41498.05 sd 0"
+    [1] "MMAS_MEM mean 38947.65 sd 0"
+O - TSP (150) com movimento / Mag 0.75 / Freq: 10 -> MMAS_MEM executou em melhores valores, porém o resultado final não foi tão diferente (MMAS_MEM < MMAS)
+    [1] "Problem 150 Magnitude 0.75 Frequency 10"
+    [1] "MMAS     mean 48045.7 sd 0"
+    [1] "MMAS_MEM mean 44962.93 sd 0"
+O - TSP (100) com movimento / Mag 0.1 / Freq: 100 -> MMAS_MEM executou melhor do que o MMAS a partir da metada
+    [1] "Problem 100 Magnitude 0.1 Frequency 100"
+    [1] "MMAS     mean 24388.45 sd 0"
+    [1] "MMAS_MEM mean 23871 sd 0"
+O - TSP (100) com movimento / Mag 0.5 / Freq: 100 -> MMAS_MEM executou melhor do que o MMAS a partir da iteração 120
+    [1] "Problem 100 Magnitude 0.5 Frequency 100"
+    [1] "MMAS     mean 31077.26 sd 0"
+    [1] "MMAS_MEM mean 28653.45 sd 0"
+O - TSP (100) com movimento / Mag 0.75 / Freq: 100 -> MMAS executou melhor do que o MMAS_MEM quase o tempo todo
+    [1] "Problem 100 Magnitude 0.75 Frequency 100"
+    [1] "MMAS     mean 33440.88 sd 0"
+    [1] "MMAS_MEM mean 34432.54 sd 0"
+O - TSP (150) com movimento / Mag 0.1 / Freq: 100 -> MMAS_MEM executou melhor do que o MMAS a partir da iterção 120
+    [1] "Problem 150 Magnitude 0.1 Frequency 100"
+    [1] "MMAS     mean 30694.94 sd 0"
+    [1] "MMAS_MEM mean 29321.51 sd 0"
+O - TSP (150) com movimento / Mag 0.5 / Freq: 100 -> MMAS_MEM executou melhor do que o MMAS
+    [1] "Problem 150 Magnitude 0.5 Frequency 100"
+    [1] "MMAS     mean 38435.62 sd 0"
+    [1] "MMAS_MEM mean 37234.13 sd 0"
+O - TSP (150) com movimento / Mag 0.75 / Freq: 100 -> MMAS executou melhor do que o MMAS_MEM
+    [1] "Problem 150 Magnitude 0.75 Frequency 100"
+    [1] "MMAS     mean 41625.26 sd 0"
+    [1] "MMAS_MEM mean 45232.6 sd 0"
+Parados os testes para executar com análise estatística nos servidores....
+
+================================================================ Experimento-3
+Comparando em execução simples na minha máquina (1-trial) do MMAS contra o MMAS-MEM com a seguinte parametrização:
+numberAnts = 50;
+alpha = 1.0;
+beta = 5.0;
+rho = 0.02;
+branchFactor = 1.0001;
+lambda = 0.05;
+iteration = 0;
+restartFoundBestIteration = 0;
+foundBestIteration = 0;
+uGb = 25;
+nnListSize = 20;
+if(isMMAS()) {
+    rho = 0.8;
+}
+if(isMMAS_MEM()) {
+    shortMemorySize = 4;
+    longMemorySize = 4;
+    immigrantRate = 0.4;
+    pMi = 0.01;
+}
+
+Nesse experimento eu usei os seguintes mecânismos:
+Seleção das formigas para atualização do feromônio são feitas com base na memória de curto tempo somente (com evaporação):
+    memory.updateShortTermMemory();
+    for (Ant ant : memory.shortMemory) {
+        pheromoneUpdate(ant);
+    }
+Atualização do ferômonio considera o custo da rota de cada formiga da memória de curto tempo:
+    double dTau = 1.0 / ant.getCost();
+    for (int i = 0; i < ant.getTour().size() - 1; i++) {
+        int fromId = ant.getTour().get(i).getId();
+        int toId = ant.getTour().get(i + 1).getId();
+        Route route = _globals.routeManager.getRoute(fromId, toId);
+        route.setPheromone(route.getPheromone() + dTau);
+    }
+Mecânismo de atualização da memória de curto tempo, é feito a cada iteração a seleção do restartBest na primeira posição,
+nas posições intermediárias são selecionadas as melhores formigas da iteração e adicionado por último um imigrante com swap
+de posições aleatórias a uma taxa de 0.1, esse algoritmo só adicionada soluções na memória (não por imigrantes) quanto o custo
+é menor ou a formiga da memória fica inválida (correção do experimento-1)
+    int imSize = (int) (immigrantRate * shortMemorySize);
+    Ant[] immigrants = new Ant[imSize];
+    for (int i = 0; i < imSize; i++) {
+        immigrants[i] = generateMemoryBasedImmigrant();
+    }
+    Set<Ant> antsPopulation = new HashSet<>();
+    Set<Double> antsCosts = new HashSet<>();
+    antsPopulation.add(_globals.restartBestAnt);
+    antsCosts.add(_globals.restartBestAnt.getCost());
+    Utils.sortAntArray(_globals.ants);
+    for (Ant ant : _globals.ants) {
+        if(!antsCosts.contains(ant.getCost())) {
+            antsPopulation.add(ant);
+            antsCosts.add(ant.getCost());
+        }
+    }
+    if(antsPopulation.size() < shortMemorySize) {
+        for (Ant ant : _globals.ants) {
+            if(!antsPopulation.contains(ant) && antsPopulation.size() < shortMemorySize) {
+                antsPopulation.add(ant);
+            }
+        }
+    }
+    Ant[] ants = antsPopulation.toArray(new Ant[0]);
+    Utils.sortAntArray(ants);
+    for(int i = 0; i < shortMemorySize; ++i) {
+        this.shortMemory[i].computeCost();
+    }
+    Utils.sortAntArray(this.shortMemory);
+    for(int i = 0; i < shortMemorySize; ++i) {
+        if(!isValidAnt(this.shortMemory[i]) || ants[i].getCost() < this.shortMemory[i].getCost()) {
+            this.shortMemory[i] = ants[i].clone();
+        }
+    }
+    for (int i = shortMemorySize - 1; i > shortMemorySize - imSize - 1; i--) {
+        shortMemory[i] = immigrants[shortMemorySize - 1 - i];
+    }
+    Utils.sortAntArray(shortMemory);
+
+Resultados obtidos:
+O - TSP (150) com movimento / Mag 0.75 / Freq: 10 -> MMAS_MEM executou melhor contra o MMAS
+    [1] "Problem 150 Magnitude 0.75 Frequency 10"
+    [1] "MMAS     mean 49040.07 sd 0"
+    [1] "MMAS_MEM mean 45860.45 sd 0"
+O - TSP (150) com movimento / Mag 0.5 / Freq: 10 -> MMAS_MEM executou melhor contra o MMAS
+    [1] "Problem 150 Magnitude 0.5 Frequency 10"
+    [1] "MMAS     mean 41658.95 sd 0"
+    [1] "MMAS_MEM mean 38776.15 sd 0"
+O - TSP (150) com movimento / Mag 0.1 / Freq: 10 -> MMAS_MEM executou melhor contra o MMAS
+    [1] "Problem 150 Magnitude 0.1 Frequency 10"
+    [1] "MMAS     mean 31035.7 sd 0"
+    [1] "MMAS_MEM mean 30252.52 sd 0"
+X - TSP (150) com movimento / Mag 0.75 / Freq: 100 -> MMAS executou melhor o MMAS_MEM, manteve um solução média enquanto o MMAS teve picos de melhor solução
+    [1] "Problem 150 Magnitude 0.75 Frequency 100"
+    [1] "MMAS     mean 42613.23 sd 0"
+    [1] "MMAS_MEM mean 43136.36 sd 0"
+O - TSP (150) com movimento / Mag 0.5 / Freq: 100 -> MMAS_MEM executou melhor o MMAS
+    [1] "Problem 150 Magnitude 0.5 Frequency 100"
+    [1] "MMAS     mean 39901.93 sd 0"
+    [1] "MMAS_MEM mean 37586.42 sd 0"
+X - TSP (150) com movimento / Mag 0.1 / Freq: 100 -> MMAS executou melhor MMA_MEM
+    [1] "Problem 150 Magnitude 0.1 Frequency 100"
+    [1] "MMAS     mean 29606.96 sd 0"
+    [1] "MMAS_MEM mean 29786.04 sd 0"
+O - TSP (100) com movimento / Mag 0.75 / Freq: 10 -> MMAS_MEM < MMAS
+    [1] "Problem 100 Magnitude 0.75 Frequency 10"
+    [1] "MMAS     mean 37975.29 sd 0"
+    [1] "MMAS_MEM mean 34196.83 sd 0"
+O - TSP (100) com movimento / Mag 0.5 / Freq: 10 -> MMAS_MEM < MMAS
+    [1] "Problem 100 Magnitude 0.5 Frequency 10"
+    [1] "MMAS     mean 32786.56 sd 0"
+    [1] "MMAS_MEM mean 31857.08 sd 0"
+X - TSP (100) com movimento / Mag 0.1 / Freq: 10 -> MMAS_MEM > MMAS
+    [1] "Problem 100 Magnitude 0.1 Frequency 10"
+    [1] "MMAS     mean 23956.21 sd 0"
+    [1] "MMAS_MEM mean 24675.81 sd 0"
+X - TSP (100) com movimento / Mag 0.75 / Freq: 100 -> MMAS_MEM > MMAS
+    [1] "Problem 100 Magnitude 0.5 Frequency 100"
+    [1] "MMAS     mean 35306.43 sd 0"
+    [1] "MMAS_MEM mean 36496.54 sd 0"
+X - TSP (100) com movimento / Mag 0.5 / Freq: 100 -> MMAS_MEM > MMAS
+    [1] "Problem 100 Magnitude 0.5 Frequency 100"
+    [1] "MMAS     mean 28243.98 sd 0"
+    [1] "MMAS_MEM mean 30444.21 sd 0"
+X - TSP (100) com movimento / Mag 0.1 / Freq: 100 -> MMAS_MEM > MMAS
+    [1] "Problem 100 Magnitude 0.1 Frequency 100"
+    [1] "MMAS     mean 23583.49 sd 0"
+    [1] "MMAS_MEM mean 24436.01 sd 0"
+O - TSP (200) com movimento / Mag 0.75 / Freq: 10 -> MMAS_MEM < MMAS
+    [1] "Problem 200 Magnitude 0.75 Frequency 10"
+    [1] "MMAS     mean 54592.31 sd 0"
+    [1] "MMAS_MEM mean 52765.47 sd 0"
+O - TSP (200) com movimento / Mag 0.5 / Freq: 10 -> MMAS_MEM < MMAS
+    [1] "Problem 200 Magnitude 0.5 Frequency 10"
+    [1] "MMAS     mean 46733.87 sd 0"
+    [1] "MMAS_MEM mean 42642.55 sd 0"
+O - TSP (200) com movimento / Mag 0.1 / Freq: 10 -> MMAS_MEM > MMAS
+    [1] "Problem 200 Magnitude 0.1 Frequency 10"
+    [1] "MMAS     mean 34066.07 sd 0"
+    [1] "MMAS_MEM mean 34126.17 sd 0"
+X - TSP (200) com movimento / Mag 0.75 / Freq: 100 -> MMAS_MEM > MMAS
+    [1] "Problem 200 Magnitude 0.75 Frequency 100"
+    [1] "MMAS     mean 47930.97 sd 0"
+    [1] "MMAS_MEM mean 49760.25 sd 0"
+O - TSP (200) com movimento / Mag 0.5 / Freq: 100 -> MMAS_MEM < MMAS
+    [1] "Problem 200 Magnitude 0.5 Frequency 100"
+    [1] "MMAS     mean 42993.94 sd 0"
+    [1] "MMAS_MEM mean 42365.74 sd 0"
+X - TSP (200) com movimento / Mag 0.1 / Freq: 100 -> MMAS_MEM > MMAS
+    [1] "Problem 200 Magnitude 0.1 Frequency 100"
+    [1] "MMAS     mean 33556.82 sd 0"
+    [1] "MMAS_MEM mean 33564.07 sd 0"
+
+================================================================ Experimento-4
+Executado os mesmos testes do Experiment-3 com a evaporação em 0.2 para o MMAS-MEM
+
+TSP_true_MMAS_0.75_10_true_4_150.csv vs TSP_true_MMAS_MEM_0.75_10_true_4_150.csv não apresentou muitas diferenças
+TSP_true_MMAS_0.75_100_true_4_150.csv vs TSP_true_MMAS_MEM_0.75_100_true_4_150.csv -> MMAS_MEM executou melhor
+
+================================================================ Experimento-5
+Executado os mesmos testes do Experiment-3 com a shortMemSize em 10 para o MMAS-MEM
+
+TSP_true_MMAS_0.75_10_true_4_150.csv vs TSP_true_MMAS_MEM_0.75_10_true_4_150.csv -> MMAS_MEM foi melhor
+TSP_true_MMAS_0.75_100_true_4_150.csv vs TSP_true_MMAS_MEM_0.75_100_true_4_150.csv -> não teve diferença
+
+================================================================ Experimento-6
+Usando controle adaptivo da evaporação
+
+public void adaptPheromone() {
+    if(_globals.isMMAS_MEM() && _globals.iteration % 10 == 0)
+        _globals.rho = 0.02 + (1.0 - statistics.getDiversity()) * (0.8 - 0.02);
+}
+
+A diversidade não fica mais estagnada em 100% abrindo brecha para otimizações melhores em execuções mais longas
+
+O - TSP (150) com movimento / Mag 0.75 / Freq: 10
+    [1] "Problem 150 Magnitude 0.75 Frequency 10"
+    [1] "MMAS     mean 48331.91 sd 0"
+    [1] "MMAS_MEM mean 46258.35 sd 0"
+O - TSP (150) com movimento / Mag 0.75 / Freq: 10
+    [1] "Problem 150 Magnitude 0.75 Frequency 100"
+    [1] "MMAS     mean 44568.59 sd 0"
+    [1] "MMAS_MEM mean 43177.89 sd 0"
+O - TSP (150) com movimento / Mag 0.5 / Freq: 10
+    [1] "Problem 150 Magnitude 0.5 Frequency 10"
+    [1] "MMAS     mean 41407.15 sd 0"
+    [1] "MMAS_MEM mean 39839.16 sd 0"
+O - TSP (150) com movimento / Mag 0.5 / Freq: 100
+    [1] "Problem 150 Magnitude 0.5 Frequency 100"
+    [1] "MMAS     mean 38844.43 sd 0"
+    [1] "MMAS_MEM mean 38106.31 sd 0"
+X - TSP (150) com movimento / Mag 0.1 / Freq: 10 -> Neste caso a falta de intensificação não favoreceu o algoritmo
+    [1] "Problem 150 Magnitude 0.1 Frequency 10"
+    [1] "MMAS     mean 31037.44 sd 0"
+    [1] "MMAS_MEM mean 31370.02 sd 0"
+O - TSP (150) com movimento / Mag 0.1 / Freq: 100
+    [1] "Problem 150 Magnitude 0.1 Frequency 100"
+    [1] "MMAS     mean 30764.25 sd 0"
+    [1] "MMAS_MEM mean 29919.65 sd 0"
+Porém requer análise estatística de precisão...

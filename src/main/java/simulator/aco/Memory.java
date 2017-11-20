@@ -32,7 +32,7 @@ public class Memory {
         _globals = globals;
         if(_globals.isMMAS_MEM()) {
             shortMemorySize = 4;
-            longMemorySize = 10;
+            longMemorySize = 4;
             immigrantRate = 0.4;
             pMi = 0.01;
         }
@@ -63,18 +63,27 @@ public class Memory {
     }
 
     public void updateLongTermMemory() {
-        boolean flag = detectChange();
-        if (flag == true) {
-            updateMemoryEveryChange();
+        if(_globals.isMIACO()) {
+            boolean flag = detectChange();
+            if (flag == true) {
+                updateMemoryEveryChange();
+            }
+            if (_globals.iteration == tM && flag == false) {
+                updateMemoryDynamically();
+                int rnd = 5 + ((int) (random.nextDouble() * 6.0));
+                tM = _globals.iteration + rnd;
+            }
+            if (_globals.iteration == tM && flag == true) {
+                int rnd = 5 + ((int) (random.nextDouble() * 6.0));
+                tM = _globals.iteration + rnd;
+            }
         }
-        if (_globals.iteration == tM && flag == false) {
+        if(_globals.isMMAS_MEM()) {
+            repairLongMemory();
+            for(int i = 0; i < longMemorySize; i++) {
+                longMemory[i].computeCost();
+            }
             updateMemoryDynamically();
-            int rnd = 5 + ((int) (random.nextDouble() * 6.0));
-            tM = _globals.iteration + rnd;
-        }
-        if (_globals.iteration == tM && flag == true) {
-            int rnd = 5 + ((int) (random.nextDouble() * 6.0));
-            tM = _globals.iteration + rnd;
         }
     }
 
@@ -175,18 +184,21 @@ public class Memory {
 
     public void repairLongMemory() {
         for (int i = 0; i < longMemorySize; i++) {
-            boolean valid = true;
-            for(int j = 0; j < Ant.getFixed(null, null).size(); j++) {
-                if(longMemory[i].getTour().get(j) != Ant.getFixed(null, null).get(j)) {
-                    valid = false;
-                    break;
-                }
-            }
+            boolean valid = isValidAnt(longMemory[i]);
             if(!valid) {
                 longMemory[i].randomWalk();
                 randomPoint[i] = true;
             }
         }
+    }
+
+    public boolean isValidAnt(Ant k) {
+        for(int j = 0; j < Ant.getFixed(null, null).size(); j++) {
+            if(k.getTour().get(j) != Ant.getFixed(null, null).get(j)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 
@@ -199,8 +211,8 @@ public class Memory {
         if(_globals.isMMAS_MEM()) {
             Set<Ant> antsPopulation = new HashSet<>();
             Set<Double> antsCosts = new HashSet<>();
-            antsPopulation.add(_globals.bestSoFar);
-            antsCosts.add(_globals.bestSoFar.getCost());
+            antsPopulation.add(_globals.restartBestAnt);
+            antsCosts.add(_globals.restartBestAnt.getCost());
             Utils.sortAntArray(_globals.ants);
             for (Ant ant : _globals.ants) {
                 if(!antsCosts.contains(ant.getCost())) {
@@ -215,15 +227,15 @@ public class Memory {
                     }
                 }
             }
-            Ant[] ants = antsPopulation.toArray(new Ant[] {});
+            Ant[] ants = antsPopulation.toArray(new Ant[0]);
             Utils.sortAntArray(ants);
-            for (int i = 0; i < shortMemorySize; i++) {
-                shortMemory[i].computeCost();
+            for(int i = 0; i < shortMemorySize; ++i) {
+                this.shortMemory[i].computeCost();
             }
-            Utils.sortAntArray(shortMemory);
-            for (int i = 0; i < shortMemorySize; i++) {
-                if(shortMemory[i].getCost() > ants[i].getCost()) {
-                    shortMemory[i] = ants[i].clone();
+            Utils.sortAntArray(this.shortMemory);
+            for(int i = 0; i < shortMemorySize; ++i) {
+                if(!isValidAnt(this.shortMemory[i]) || ants[i].getCost() < this.shortMemory[i].getCost()) {
+                    this.shortMemory[i] = ants[i].clone();
                 }
             }
             for (int i = shortMemorySize - 1; i > shortMemorySize - imSize - 1; i--) {
