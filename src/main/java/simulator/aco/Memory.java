@@ -30,18 +30,6 @@ public class Memory {
     public Memory(Globals globals) {
         super();
         _globals = globals;
-        if(_globals.isMMAS_MEM()) {
-            shortMemorySize = 4;
-            longMemorySize = 4;
-            immigrantRate = 0.4;
-            pMi = 0.01;
-        }
-        if(_globals.isMIACO()) {
-            shortMemorySize = 10;
-            longMemorySize = 4;
-            immigrantRate = 0.4;
-            pMi = 0.01;
-        }
         shortMemory = new Ant[shortMemorySize];
         longMemory = new Ant[longMemorySize];
         randomPoint = new boolean[longMemorySize];
@@ -203,12 +191,13 @@ public class Memory {
 
 
     public void updateShortTermMemory() {
-        int imSize = (int) (immigrantRate * shortMemorySize);
-        Ant[] immigrants = new Ant[imSize];
-        for (int i = 0; i < imSize; i++) {
-            immigrants[i] = generateMemoryBasedImmigrant();
-        }
+
         if(_globals.isMMAS_MEM()) {
+            int imSize = (int) (immigrantRate * shortMemorySize);
+            Ant[] immigrants = new Ant[imSize];
+            for (int i = 0; i < imSize; i++) {
+                immigrants[i] = generateMemoryBasedImmigrant();
+            }
             Set<Ant> antsPopulation = new HashSet<>();
             Set<Double> antsCosts = new HashSet<>();
             antsPopulation.add(_globals.restartBestAnt);
@@ -243,7 +232,13 @@ public class Memory {
             }
             Utils.sortAntArray(shortMemory);
         }
+
         if(_globals.isMIACO()) {
+            int imSize = (int) (immigrantRate * shortMemorySize);
+            Ant[] immigrants = new Ant[imSize];
+            for (int i = 0; i < imSize; i++) {
+                immigrants[i] = generateMemoryBasedImmigrant();
+            }
             Utils.sortAntArray(_globals.ants);
             for (int i = 0; i < shortMemorySize; i++) {
                 shortMemory[i] = _globals.ants[i].clone();
@@ -252,23 +247,39 @@ public class Memory {
                 shortMemory[i] = immigrants[shortMemorySize - 1 - i];
             }
         }
+
+        if(_globals.isEIACO()) {
+            int imSize = (int) Math.ceil(immigrantRate * shortMemorySize);
+            Utils.sortAntArray(_globals.ants);
+            for(int i = 0; i < shortMemorySize; ++i) {
+                this.shortMemory[i] = _globals.ants[i].clone();
+            }
+            _globals.previousBestSoFarAnt.computeCost();
+            Ant[] immigrants = new Ant[imSize];
+            for (int i = 0; i < imSize; i++) {
+                immigrants[i] = generateMemoryBasedImmigrant();
+            }
+            for (int i = shortMemorySize - 1; i > shortMemorySize - imSize - 1; i--) {
+                shortMemory[i] = immigrants[shortMemorySize - 1 - i];
+            }
+        }
     }
 
     public Ant generateMemoryBasedImmigrant() {
-        Ant longMemoryBest = findLongTermBest().clone();
-        for(int i = 1; i < longMemoryBest.getTour().size() - 1; i++) {
+        Ant selectedAnt = findAnt().clone();
+        for(int i = 1; i < selectedAnt.getTour().size() - 1; i++) {
             if(random.nextDouble() < pMi) {
-                int index = (int) ((random.nextDouble() * (longMemoryBest.getTour().size() - 2)) + 1);
-                Node temp = longMemoryBest.getTour().get(i);
-                longMemoryBest.getTour().set(i, longMemoryBest.getTour().get(index));
-                longMemoryBest.getTour().set(index, temp);
+                int index = (int) ((random.nextDouble() * (selectedAnt.getTour().size() - 2)) + 1);
+                Node temp = selectedAnt.getTour().get(i);
+                selectedAnt.getTour().set(i, selectedAnt.getTour().get(index));
+                selectedAnt.getTour().set(index, temp);
             }
         }
-        longMemoryBest.computeCost();
-        return longMemoryBest;
+        selectedAnt.computeCost();
+        return selectedAnt;
     }
 
-    public Ant findLongTermBest() {
+    public Ant findAnt() {
         if(_globals.isMIACO()) {
             int index = 0;
             double cost = longMemory[index].getCost();
@@ -290,6 +301,9 @@ public class Memory {
                 }
             }
             return _globals.ants[index];
+        }
+        if(_globals.isEIACO()) {
+            return _globals.previousBestSoFarAnt;
         }
         return null;
     }

@@ -1,5 +1,6 @@
 package simulator;
 
+import org.apache.log4j.Logger;
 import simulator.graph.Graph;
 import simulator.graph.Node;
 import simulator.aco.Route;
@@ -56,11 +57,15 @@ public class Simulator {
         visitedPoints.add(currentNode);
         notVisitedPoints.remove(currentNode);
         timePass = stepSize;
+        if(printGraph) {
+            visualizer.setStat("Starting in 4s");
+            try { Thread.sleep(4000); } catch (Exception e) { e.printStackTrace(); }
+        }
     }
 
     public void loop(int t) {
         if(!notVisitedPoints.isEmpty()) {
-            if(t > timePass) {
+            if(t >= timePass) {
                 for(Node node : routeSolver.getResultTour()) {
                     if(!visitedPoints.contains(node)) {
                         routeSolver.addVisited(node);

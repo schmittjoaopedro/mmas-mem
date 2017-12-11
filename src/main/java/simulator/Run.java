@@ -34,7 +34,7 @@ public class Run {
 
     public static void runSimulation(ProgramInstance programInstance) {
 
-        int trialSize = 1;
+        int trialSize = 10;
         int iterationSize = 1000;
         double lowerBound = 0;
         double upperBound = 2;
@@ -80,6 +80,7 @@ public class Run {
 
             if(simulator != null) simulator.setup();
             routeSolver.setup();
+            Long time = System.currentTimeMillis();
             for (int i = 1; i < iterationSize; i++) {
 //                dynamicEdgeGenerator.loop(i);
                 dynamicRouteGenerator.loop(i);
@@ -89,7 +90,9 @@ public class Run {
                     Logger.getLogger(Run.class).info("Iteration = " + i);
                 }
             }
+            Logger.getLogger(Run.class).info("Time taken = " + (System.currentTimeMillis() - time));
             Stack<Node> result = routeSolver.getResultTour();
+            Logger.getLogger(Run.class).info("Fitness evaluation count = " + routeSolver.getFECount());
             String resultRoute = "";
             for(int i = 0; i < result.size(); i++) {
                 resultRoute += result.get(i).getId();

@@ -42,7 +42,7 @@ public class DynamicEdgeGenerator {
     }
 
     public void loop(int t) {
-        if(t > nextTime) {
+        if(t >= nextTime) {
             if(cycle) {
                 for(Map.Entry<Edge, Double> edgeCost : cycles.get(period).entrySet()) {
                     edgeCost.getKey().setCost(edgeCost.getValue());
@@ -93,6 +93,14 @@ public class DynamicEdgeGenerator {
                 } else {
                     cycles.get(i).put(edge, edge.getOriginalCost());
                 }
+            }
+        }
+        for(int i = 0; i < periodLimit; i++) {
+            for(Map.Entry<Edge, Double> edgeCost : cycles.get(i).entrySet()) {
+                edgeCost.getKey().setCost(edgeCost.getValue());
+            }
+            if(this.getDynamicListener() != null) {
+                this.getDynamicListener().updatedWeights(cycle, i);
             }
         }
     }

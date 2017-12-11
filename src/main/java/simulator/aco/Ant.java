@@ -165,6 +165,7 @@ public class Ant {
                 }
             }
         }
+        _globals.fitnessEvalCount++;
     }
 
     public Stack<Node> getTour() {

@@ -1,5 +1,5 @@
 package simulator.aco;
 
 public enum Algorithm {
-    MMAS, MMAS_MEM, MIACO
+    MMAS, MMAS_MEM, MIACO, EIACO
 }

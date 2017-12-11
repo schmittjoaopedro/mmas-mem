@@ -61,7 +61,11 @@ public class Globals {
 
     public double q0;
 
+    public boolean envChanged = false;
+
     public Algorithm algorithm;
+
+    public Long fitnessEvalCount = 0L;
 
     public Globals(Algorithm algorithm) {
         this.algorithm = algorithm;
@@ -84,6 +88,30 @@ public class Globals {
         if(isMMAS()) {
             rho = 0.8;
         }
+        if(isMMAS_MEM()) {
+            Memory.shortMemorySize = 4;
+            Memory.longMemorySize = 4;
+            Memory.immigrantRate = 0.4;
+            Memory.pMi = 0.01;
+            envChanged = false;
+        }
+        if(isMIACO()) {
+            Memory.shortMemorySize = 10;
+            Memory.longMemorySize = 4;
+            Memory.immigrantRate = 0.4;
+            Memory.pMi = 0.01;
+        }
+        if(isEIACO()) {
+            rho = 0.8;
+            Memory.shortMemorySize = 3;
+            Memory.longMemorySize = 3;
+            Memory.immigrantRate = 0.5;
+            Memory.pMi = 0.01;
+        }
+    }
+
+    public boolean isEIACO() {
+        return Algorithm.EIACO == this.algorithm;
     }
 
     public boolean isMMAS() {

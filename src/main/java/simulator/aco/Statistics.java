@@ -68,6 +68,9 @@ public class Statistics {
         genericStatistics.addBestSoFar(iter, trial, bsf);
         genericStatistics.addDiv(iter, trial, div);
         genericStatistics.addBranch(iter, trial, _globals.branchFactorValue);
+        if(_globals.isMIACO()) {
+            _globals.previousBestSoFarAnt = _globals.bestSoFar.clone();
+        }
     }
 
     public double mean(double[] values) {
