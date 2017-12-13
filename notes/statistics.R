@@ -5,9 +5,10 @@ pathName = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/"
 fileType = "TSP"
 fileSimulated = "true"
 fileNVertices = "100"
-fileFrequency = "10"
+fileFrequency = "100"
 fileMagnitude = "0.75"
 
+executeHypothesisTest()
 printStats()
 plotGraph("bsf")
 
@@ -16,7 +17,6 @@ plotGraph("mean")
 plotGraph("worst")
 plotGraph("div")
 
-executeHypothesisTest()
 
 #####################################
 
@@ -63,9 +63,9 @@ printStats <- function() {
     dataEIACO <- read.csv(file = paste(pathName, fileType, "_", fileSimulated, "_EIACO_", fileMagnitude, "_", fileFrequency, "_true_4_", fileNVertices, ".csv", sep = ""))
     
     print(paste("Problem", fileNVertices, "Magnitude", fileMagnitude, "Frequency", fileFrequency))
-    print(paste("MMAS     mean", round(mean(dataMMAS$bsf), digits = 2), "sd", round(sdStats(dataMMAS), digits = 2)))
-    print(paste("MMAS_MEM mean", round(mean(dataMMASMEM$bsf), digits = 2), "sd", round(sdStats(dataMMASMEM), digits = 2)))
-    print(paste("EIACO mean", round(mean(dataEIACO$bsf), digits = 2), "sd", round(sdStats(dataEIACO), digits = 2)))
+    print(paste("MMAS     mean", round(mean(dataMMAS$bsf), digits = 2), "sd", round(sdStats(dataMMAS), digits = 2), "median", round(median(dataMMAS$bsf), digits = 2)))
+    print(paste("MMAS_MEM mean", round(mean(dataMMASMEM$bsf), digits = 2), "sd", round(sdStats(dataMMASMEM), digits = 2), "median", round(median(dataMMASMEM$bsf), digits = 2)))
+    print(paste("EIACO    mean", round(mean(dataEIACO$bsf), digits = 2), "sd", round(sdStats(dataEIACO), digits = 2), "median", round(median(dataEIACO$bsf), digits = 2)))
 }
 
 #####################################
@@ -74,8 +74,11 @@ executeHypothesisTest <- function() {
     # http://data.library.virginia.edu/the-wilcoxon-rank-sum-test/
     dataMMAS <- read.csv(file = paste(pathName, fileType, "_", fileSimulated, "_MMAS_", fileMagnitude, "_", fileFrequency, "_true_4_", fileNVertices, ".csv", sep = ""))
     dataMMASMEM <- read.csv(file = paste(pathName, fileType, "_", fileSimulated, "_MMAS_MEM_", fileMagnitude, "_", fileFrequency, "_true_4_", fileNVertices, ".csv", sep = ""))
+    dataEIACO <- read.csv(file = paste(pathName, fileType, "_", fileSimulated, "_EIACO_", fileMagnitude, "_", fileFrequency, "_true_4_", fileNVertices, ".csv", sep = ""))
     
     parametricData <- data.frame(data = dataMMAS$bsf, cat = "MMAS")
     parametricData <- rbind(parametricData, data.frame(data = dataMMASMEM$bsf, cat = "MMAS-MEM"))
-    wilcox.test(data ~ cat, parametricData, conf.int = TRUE)
+    parametricData <- rbind(parametricData, data.frame(data = dataEIACO$bsf, cat = "EIACO"))
+    #wilcox.test(data ~ cat, parametricData, conf.int = TRUE)
+    kruskal.test(data ~ cat, data = parametricData)
 }
