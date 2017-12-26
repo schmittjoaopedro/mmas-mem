@@ -34,8 +34,8 @@ public class Run {
 
     public static void runSimulation(ProgramInstance programInstance) {
 
-        int trialSize = 10;
-        int iterationSize = 1000;
+        int trialSize = 30;
+        int iterationSize = 100 * programInstance.frequency;
         double lowerBound = 0;
         double upperBound = 2;
 

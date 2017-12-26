@@ -31,16 +31,16 @@ plotGraph <- function(property) {
 
 #####################################
 
-pathName = "/home/joao/Área de Trabalho/Temp/Java/tests/"
-fileType = "TSP"
-fileSimulated = "true"
-fileNVertices = "200"
+pathName = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/StatisticsPaper2/"
+fileType = "NORMAL"
+fileSimulated = "false"
+fileNVertices = "78"
 filePlot = "bsf"
 plotType = "line"
 
 dev.off()
 filename = paste(fileType, "_", fileSimulated, "_", fileNVertices, ".png", sep = "")
-#png(filename, width = 12, height = 5, units = 'in', res = 300)
+png(filename, width = 12, height = 5, units = 'in', res = 300)
 par(mar=c(3,3,2,1))
 par(mfrow = c(2,3))
 par(mgp=c(2, 1, 0))
@@ -70,4 +70,4 @@ fileFrequency = "100"
 fileMagnitude = "0.75"
 plotGraph(filePlot)
 
-#dev.off()
+dev.off()

@@ -212,7 +212,7 @@ public class RouteSolver implements DynamicListener {
     }
 
     public void printBestSoFar() {
-        statistics.printStatistics();
+//        statistics.printStatistics();
     }
 
     public Ant findBestAnt() {

@@ -1,21 +1,21 @@
 library(plotly)
 
-pathName = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/"
-#pathName = "/home/joao/Área de Trabalho/Temp/Java/tests/"
-fileType = "TSP"
+#pathName = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/"
+pathName = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/StatisticsPaper2/"
+fileType = "NORMAL"
 fileSimulated = "true"
-fileNVertices = "100"
+fileNVertices = "78"
 fileFrequency = "100"
-fileMagnitude = "0.75"
+fileMagnitude = "0.5"
 
 executeHypothesisTest()
 printStats()
 plotGraph("bsf")
 
-plotGraph("best")
-plotGraph("mean")
-plotGraph("worst")
-plotGraph("div")
+#plotGraph("best")
+#plotGraph("mean")
+#plotGraph("worst")
+#plotGraph("div")
 
 
 #####################################
@@ -63,9 +63,9 @@ printStats <- function() {
     dataEIACO <- read.csv(file = paste(pathName, fileType, "_", fileSimulated, "_EIACO_", fileMagnitude, "_", fileFrequency, "_true_4_", fileNVertices, ".csv", sep = ""))
     
     print(paste("Problem", fileNVertices, "Magnitude", fileMagnitude, "Frequency", fileFrequency))
-    print(paste("MMAS     mean", round(mean(dataMMAS$bsf), digits = 2), "sd", round(sdStats(dataMMAS), digits = 2), "median", round(median(dataMMAS$bsf), digits = 2)))
-    print(paste("MMAS_MEM mean", round(mean(dataMMASMEM$bsf), digits = 2), "sd", round(sdStats(dataMMASMEM), digits = 2), "median", round(median(dataMMASMEM$bsf), digits = 2)))
-    print(paste("EIACO    mean", round(mean(dataEIACO$bsf), digits = 2), "sd", round(sdStats(dataEIACO), digits = 2), "median", round(median(dataEIACO$bsf), digits = 2)))
+    print(paste("MMAS     mean", round(mean(dataMMAS$bsf), digits = 0), "sd", round(sdStats(dataMMAS), digits = 0), "median", round(median(dataMMAS$bsf), digits = 0)))
+    print(paste("MMAS_MEM mean", round(mean(dataMMASMEM$bsf), digits = 0), "sd", round(sdStats(dataMMASMEM), digits = 0), "median", round(median(dataMMASMEM$bsf), digits = 0)))
+    print(paste("EIACO    mean", round(mean(dataEIACO$bsf), digits = 0), "sd", round(sdStats(dataEIACO), digits = 0), "median", round(median(dataEIACO$bsf), digits = 0)))
 }
 
 #####################################
@@ -78,7 +78,14 @@ executeHypothesisTest <- function() {
     
     parametricData <- data.frame(data = dataMMAS$bsf, cat = "MMAS")
     parametricData <- rbind(parametricData, data.frame(data = dataMMASMEM$bsf, cat = "MMAS-MEM"))
+    print(paste("MMAS-MEM->MMAS", wilcox.test(data ~ cat, parametricData, conf.int = TRUE)$p.value))
+    
+    parametricData <- data.frame(data = dataMMASMEM$bsf, cat = "MMAS-MEM")
     parametricData <- rbind(parametricData, data.frame(data = dataEIACO$bsf, cat = "EIACO"))
-    #wilcox.test(data ~ cat, parametricData, conf.int = TRUE)
-    kruskal.test(data ~ cat, data = parametricData)
+    print(paste("MMAS-MEM->EIACO", wilcox.test(data ~ cat, parametricData, conf.int = TRUE)$p.value))
+    #kruskal.test(data ~ cat, data = parametricData)
+    
+    parametricData <- data.frame(data = dataMMAS$bsf, cat = "MMAS")
+    parametricData <- rbind(parametricData, data.frame(data = dataEIACO$bsf, cat = "EIACO"))
+    print(paste("MMAS->EIACO", wilcox.test(data ~ cat, parametricData, conf.int = TRUE)$p.value))
 }
