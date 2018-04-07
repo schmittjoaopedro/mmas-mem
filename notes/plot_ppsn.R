@@ -18,10 +18,14 @@ plotGraph <- function(property) {
     
     if(plotType == "line") {
         fSize = 1.2
-        plot(data$iteration, data$mmas, type = "l", col = "black", main = title, xlab = "Iteration", ylab = "Fitness", 
-             cex.lab=fSize, cex.axis=fSize, cex.main=fSize, lwd = .5)
-        lines(data$iteration, data$mmas_mem, col = "black", lty=10, lwd=2)
-        legend("topleft", legend = c("MMAS","MMAS_MEM"), lty=c(1, 10), lwd=c(.5, 2))   
+        dataLimMin = c(min(data$mmas), min(data$mmas_mem))
+        dataLimMax = c(max(data$mmas), max(data$mmas_mem))
+        dataLim = c(min(dataLimMin) - 1000, min(dataLimMax) + 1000)
+        print(dataLim)
+        plot(data$iteration, data$mmas, type = "l", col = "black", main = title, xlab = "Iteration", ylab = "POFF", 
+             cex.lab=1.3, cex.axis=1.3, cex.main=1.5, lty=3, lwd = 1, ylim = dataLim)
+        lines(data$iteration, data$mmas_mem, col = "black", lty=1, lwd=1.5)
+        legend("topleft", legend = c("MMAS","MMAS_MEM"), lty=c(3, 1), lwd=c(1, 1.5))   
     } else {
         data <- data.frame(data = dataMMAS$bsf, cat = rep("MMAS", dim(dataMMAS)[1]))
         data <- rbind(data, data.frame(data = dataMMASMEM$bsf, cat = rep("MMAS-MEM", dim(dataMMASMEM)[1])))
@@ -32,17 +36,17 @@ plotGraph <- function(property) {
 #####################################
 
 pathName = "/home/joao/projects/master-degree/aco-dynamic-tsp-algorithm/output/StatisticsPaper2/"
-fileType = "NORMAL"
-fileSimulated = "false"
-fileNVertices = "78"
+fileType = "TSP"
+fileSimulated = "true"
+fileNVertices = "150"
 filePlot = "bsf"
 plotType = "line"
 
 #dev.off()
 #filename = paste(fileType, "_", fileSimulated, "_", fileNVertices, ".png", sep = "")
 #png(filename, width = 12, height = 5, units = 'in', res = 300)
-par(mar=c(3,3,2,1))
-par(mfrow = c(2,3))
+par(mar=c(3,3.2,2,1))
+par(mfrow = c(3,2))
 par(mgp=c(2, 1, 0))
 
 
@@ -50,20 +54,20 @@ fileFrequency = "10"
 fileMagnitude = "0.1"
 plotGraph(filePlot)
 
+fileFrequency = "100"
+fileMagnitude = "0.1"
+plotGraph(filePlot)
+
 fileFrequency = "10"
+fileMagnitude = "0.5"
+plotGraph(filePlot)
+
+fileFrequency = "100"
 fileMagnitude = "0.5"
 plotGraph(filePlot)
 
 fileFrequency = "10"
 fileMagnitude = "0.75"
-plotGraph(filePlot)
-
-fileFrequency = "100"
-fileMagnitude = "0.1"
-plotGraph(filePlot)
-
-fileFrequency = "100"
-fileMagnitude = "0.5"
 plotGraph(filePlot)
 
 fileFrequency = "100"
