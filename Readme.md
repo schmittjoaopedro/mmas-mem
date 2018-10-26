@@ -6,9 +6,11 @@ Besides that, in this study, we are applying the algorithm over dynamic and asym
 
 This study was presented in the 7th Brazilian Conference on Intelligent Systems (BRACIS 2018). For further information, the paper is available at (#link) and the presentation video is available below:
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=znOOfW4WXyE" target="_blank">
-    <img alt="MMAS_MEM for ADTSP in Java" src="https://img.youtube.com/vi/znOOfW4WXyE/0.jpg" style="width:100%;height:100%;" />
+<div align="center">
+<a href="http://www.youtube.com/watch?feature=player_embedded&amp;v=znOOfW4WXyE" rel="nofollow">
+    <img alt="MMAS_MEM for ADTSP in Java" src="https://camo.githubusercontent.com/89451f45d464979347f0fcf9851a0b13eb53bc18/68747470733a2f2f696d672e796f75747562652e636f6d2f76692f7a6e4f4f665734575879452f302e6a7067" data-canonical-src="https://img.youtube.com/vi/znOOfW4WXyE/0.jpg" style="max-width:100%;">
 </a>
+</div>
 
 ## Quick reference
 
