@@ -4,7 +4,7 @@ It's proposed here a Max-Min Ant System with Memory algorithm, named as MMAS_MEM
 
 Besides that, in this study, we are applying the algorithm over dynamic and asymmetric traveling salesman problem with moving vehicle. The problem dynamics is inspired by traffic factors used in Mavrovouniotis (2013).
 
-This study was presented in the 7th Brazilian Conference on Intelligent Systems (BRACIS 2018). For further information, the paper is available at (#link) and the presentation video is available below:
+This study was presented in the 7th Brazilian Conference on Intelligent Systems (BRACIS 2018). For further information, the paper is available at ([IEEEXplorer](https://ieeexplore.ieee.org/document/8575580)) and the presentation video is available below:
 
 <div align="center">
 <a href="http://www.youtube.com/watch?feature=player_embedded&amp;v=znOOfW4WXyE" rel="nofollow">
@@ -37,3 +37,5 @@ The following items describe a macro view of the system:
 Stutzle, T., & Hoos, H. (1997). MAX MIN Ant System and Local Search for the Traveling Salesman Problem. Ieee International Conference on Evolutionary Computation (Icec’97), 309–314. https://doi.org/10.1109/ICEC.1997.592327
 
 Mavrovouniotis, M., & Yang, S. (2013). Ant colony optimization with immigrants schemes for the dynamic travelling salesman problem with traffic factors. Applied Soft Computing Journal. https://doi.org/10.1016/j.asoc.2013.05.022
+
+Schmitt, P. J., Baldo, F., Stubs Parpinelli, R. (2018). A MAX-MIN Ant System with Short-Term Memory Applied to the Dynamic and Asymmetric Traveling Salesman Problem. 2018 7th Brazilian Conference on Intelligent Systems (BRACIS).
